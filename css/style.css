@@ -1039,6 +1039,7 @@ border-radius: 4px;
 background-size: contain;
 height: min-content;
 width: min-content;
+align-content: center;
 }
 
 
