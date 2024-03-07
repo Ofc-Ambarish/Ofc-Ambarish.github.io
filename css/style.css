@@ -1037,6 +1037,8 @@ box-shadow: 0 0 2px rgba(0,140,186,0.5);
 border: 1px solid;
 border-radius: 4px;
 background-size: contain;
+height: min-content;
+width: min-content;
 }
 
 
