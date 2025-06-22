@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -27,18 +28,12 @@
       transform: translateY(-5px);
     }
 
-    .image_wrapper {
-      padding: 10px;
-      margin: 10px;
-      background-color: white;
-    }
-
-    .image_wrapper img {
+    .blog_card img {
+      display: block;
       width: 100%;
       height: 200px;
       object-fit: cover;
-      border-radius: 10px;
-      display: block;
+      border-radius: 10px 10px 0 0;
     }
 
     .blog_card .content {
@@ -50,19 +45,41 @@
       margin-bottom: 10px;
     }
 
-    .blog_card .content p {
-      font-size: 14px;
-      color: #555;
+    .meta_info {
+      font-size: 13px;
+      color: #777;
+      margin-bottom: 10px;
     }
 
-    .blog_card .content .btn {
-      margin-top: 15px;
+    .author_info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .author_info img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
     }
 
     .heading_container h2 {
       text-align: center;
       margin-bottom: 40px;
       font-size: 2rem;
+    }
+
+    .search_bar {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .search_bar input {
+      padding: 10px;
+      width: 300px;
+      max-width: 90%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
     }
   </style>
 </head>
@@ -77,41 +94,9 @@
             <img src="images/logo.gif" alt="" />
             <span>Ambarish</span>
           </a>
-          <div class="contact_nav">
-            <ul class="navbar-nav">
-              <li class="nav-item"><a class="nav-link" href="database.html"><img src="images/database.jpeg" alt="" /><span>DBS1</span></a></li>
-              <li class="nav-item"><a class="nav-link" href="service.html"><img src="images/call.png" alt="" /><span>Call : +91 9382259849</span></a></li>
-              <li class="nav-item"><a class="nav-link" href="service.html"><img src="images/envelope.png" alt="" /><span>ambarish.ofc@gmail.com</span></a></li>
-            </ul>
-          </div>
         </nav>
       </div>
     </header>
-
-    <!-- Navigation -->
-    <section class="slider_section slider_bg position-relative">
-      <div class="container">
-        <div class="custom_nav2">
-          <nav class="navbar navbar-expand-lg custom_nav-container">
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
-              <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-              <div class="d-flex flex-column flex-lg-row align-items-center">
-                <ul class="navbar-nav">
-                  <li class="nav-item active"><a class="nav-link" href="index.html">Home</a></li>
-                  <li class="nav-item"><a class="nav-link" href="database1.html">Database 1</a></li>
-                  <li class="nav-item"><a class="nav-link" href="database2.html">Database 2</a></li>
-                  <li class="nav-item"><a class="nav-link" href="contact.html">Contact Us</a></li>
-                  <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
-                  <li class="nav-item"><a class="nav-link" href="blog.html">Blog</a></li>
-                </ul>
-              </div>
-            </div>
-          </nav>
-        </div>
-      </div>
-    </section>
 
     <!-- Blog Section -->
     <section class="blog_section">
@@ -119,8 +104,13 @@
         <div class="heading_container">
           <h2>Latest Blog Posts</h2>
         </div>
+
+        <div class="search_bar">
+          <input type="text" id="searchInput" placeholder="Search blog posts...">
+        </div>
+
         <div class="row" id="blog-container">
-          <!-- Dynamic blog cards -->
+          <!-- Dynamic blog cards will be loaded here -->
         </div>
       </div>
     </section>
@@ -131,36 +121,62 @@
     </section>
   </div>
 
-  <!-- Scripts -->
   <script src="js/jquery-3.4.1.min.js"></script>
   <script src="js/bootstrap.js"></script>
   <script>
-    fetch('blog.json')
-      .then(res => res.json())
-      .then(data => {
-        const container = document.getElementById('blog-container');
-        data.forEach(blog => {
+    let blogs = [];
+
+    function renderBlogs(filter = '') {
+      const container = document.getElementById('blog-container');
+      container.innerHTML = '';
+      blogs
+        .filter(blog =>
+          blog.title.toLowerCase().includes(filter.toLowerCase()) ||
+          blog.summary.toLowerCase().includes(filter.toLowerCase())
+        )
+        .forEach(blog => {
+          const key = encodeURIComponent(blog.title);
           const blogCard = document.createElement('div');
           blogCard.className = 'col-md-4';
           blogCard.innerHTML = `
             <div class="blog_card">
-              <div class="image_wrapper">
-                <img src="${blog.image}" alt="${blog.title}">
-              </div>
+              <img src="${blog.image}" alt="${blog.title}">
               <div class="content">
                 <h5>${blog.title}</h5>
+                <div class="meta_info">
+                  <div class="author_info">
+                    <img src="${blog.authorImage}" alt="${blog.author}">
+                    <span>${blog.author}</span>
+                  </div>
+                  <div>Date: ${blog.date}</div>
+                  <div id="view-${key}">Views: ...</div>
+                </div>
                 <p>${blog.summary}</p>
                 <a href="${blog.link}" class="btn btn-primary">Read More</a>
               </div>
             </div>
           `;
           container.appendChild(blogCard);
+
+          fetch(`https://api.countapi.xyz/hit/ambarish.blog/${key}`)
+            .then(res => res.json())
+            .then(data => {
+              document.getElementById(`view-${key}`).innerText = `Views: ${data.value}`;
+            });
         });
-      })
-      .catch(err => {
-        console.error("Failed to load blog posts:", err);
-        document.getElementById('blog-container').innerHTML = `<p>Error loading blog posts.</p>`;
+    }
+
+    fetch('blog.json')
+      .then(res => res.json())
+      .then(data => {
+        blogs = data;
+        renderBlogs();
       });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      renderBlogs(e.target.value);
+    });
   </script>
 </body>
+
 </html>
