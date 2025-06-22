@@ -29,153 +29,157 @@
     }
 
     .blog_card img {
-      display: block;
       width: 100%;
       height: 200px;
       object-fit: cover;
       border-radius: 10px 10px 0 0;
     }
 
-    .blog_card .content {
+    .content {
       padding: 20px;
     }
 
-    .blog_card .content h5 {
+    .content h5 {
       font-weight: 600;
       margin-bottom: 10px;
     }
 
-    .meta_info {
+    .content .meta {
       font-size: 13px;
       color: #777;
       margin-bottom: 10px;
     }
 
-    .author_info {
+    .author-box {
       display: flex;
       align-items: center;
-      gap: 10px;
+      margin-top: 10px;
     }
 
-    .author_info img {
+    .author-box img {
       width: 30px;
       height: 30px;
       border-radius: 50%;
+      margin-right: 10px;
     }
 
-    .heading_container h2 {
-      text-align: center;
-      margin-bottom: 40px;
-      font-size: 2rem;
+    .view-count {
+      font-size: 13px;
+      color: #999;
     }
 
-    .search_bar {
-      text-align: center;
-      margin-bottom: 40px;
+    .search-bar {
+      max-width: 400px;
+      margin: 0 auto 40px auto;
     }
 
-    .search_bar input {
-      padding: 10px;
-      width: 300px;
-      max-width: 90%;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+    .modal-body img {
+      width: 100%;
+      height: auto;
+      margin-bottom: 15px;
     }
   </style>
 </head>
 
 <body>
   <div class="hero_area">
-    <!-- Header section -->
-    <header class="header_section">
-      <div class="container">
-        <nav class="navbar navbar-expand-lg custom_nav-container">
-          <a class="navbar-brand" href="index.html">
-            <img src="images/logo.gif" alt="" />
-            <span>Ambarish</span>
-          </a>
-        </nav>
-      </div>
-    </header>
-
     <!-- Blog Section -->
     <section class="blog_section">
       <div class="container">
-        <div class="heading_container">
+        <div class="heading_container text-center">
           <h2>Latest Blog Posts</h2>
         </div>
-
-        <div class="search_bar">
-          <input type="text" id="searchInput" placeholder="Search blog posts...">
-        </div>
-
+        <input type="text" id="searchInput" class="form-control search-bar" placeholder="Search blog posts...">
         <div class="row" id="blog-container">
-          <!-- Dynamic blog cards will be loaded here -->
+          <!-- Blog cards will be inserted dynamically -->
         </div>
       </div>
     </section>
-
-    <!-- Footer -->
-    <section class="container-fluid footer_section">
-      <p>&copy; 2024 All Rights Reserved. Designed by <a href="#">Ambarish</a></p>
-    </section>
   </div>
 
-  <script src="js/jquery-3.4.1.min.js"></script>
-  <script src="js/bootstrap.js"></script>
-  <script>
-    let blogs = [];
+  <!-- Modal Preview -->
+  <div class="modal fade" id="blogModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="blogModalTitle"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="blogModalBody"></div>
+        <div class="modal-footer">
+          <small class="text-muted" id="blogModalMeta"></small>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    function renderBlogs(filter = '') {
+  <!-- Scripts -->
+  <script src="js/jquery-3.4.1.min.js"></script>
+  <script src="js/bootstrap.bundle.js"></script>
+  <script>
+    let blogData = [];
+
+    function loadBlogCards(data) {
       const container = document.getElementById('blog-container');
       container.innerHTML = '';
-      blogs
-        .filter(blog =>
-          blog.title.toLowerCase().includes(filter.toLowerCase()) ||
-          blog.summary.toLowerCase().includes(filter.toLowerCase())
-        )
-        .forEach(blog => {
-          const key = encodeURIComponent(blog.title);
-          const blogCard = document.createElement('div');
-          blogCard.className = 'col-md-4';
-          blogCard.innerHTML = `
-            <div class="blog_card">
-              <img src="${blog.image}" alt="${blog.title}">
-              <div class="content">
-                <h5>${blog.title}</h5>
-                <div class="meta_info">
-                  <div class="author_info">
-                    <img src="${blog.authorImage}" alt="${blog.author}">
-                    <span>${blog.author}</span>
-                  </div>
-                  <div>Date: ${blog.date}</div>
-                  <div id="view-${key}">Views: ...</div>
-                </div>
-                <p>${blog.summary}</p>
-                <a href="${blog.link}" class="btn btn-primary">Read More</a>
+
+      data.forEach((blog, index) => {
+        const card = document.createElement('div');
+        card.className = 'col-md-4';
+
+        card.innerHTML = `
+          <div class="blog_card">
+            <img src="${blog.image}" alt="${blog.title}">
+            <div class="content">
+              <h5>${blog.title}</h5>
+              <div class="meta">${blog.date} | <span class="view-count" id="view-${index}">Views: ...</span></div>
+              <p>${blog.summary}</p>
+              <button class="btn btn-primary" onclick="openModal(${index})">Read More</button>
+              <div class="author-box">
+                <img src="${blog.authorImage}" alt="${blog.author}">
+                <span>${blog.author}</span>
               </div>
             </div>
-          `;
-          container.appendChild(blogCard);
+          </div>`;
 
-          fetch(`https://api.countapi.xyz/hit/ambarish.blog/${key}`)
-            .then(res => res.json())
-            .then(data => {
-              document.getElementById(`view-${key}`).innerText = `Views: ${data.value}`;
-            });
+        container.appendChild(card);
+        updateViews(index);
+      });
+    }
+
+    function openModal(index) {
+      const blog = blogData[index];
+      document.getElementById('blogModalTitle').textContent = blog.title;
+      document.getElementById('blogModalBody').innerHTML = `<img src="${blog.image}"><p>${blog.content}</p>`;
+      document.getElementById('blogModalMeta').textContent = `${blog.author} | ${blog.date}`;
+      new bootstrap.Modal(document.getElementById('blogModal')).show();
+    }
+
+    function updateViews(index) {
+      const blog = blogData[index];
+      const namespace = 'ambarish-blog';
+      const key = `post-${index}`;
+      fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`)
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById(`view-${index}`).textContent = `Views: ${data.value}`;
         });
     }
 
+    // Search
+    document.getElementById('searchInput').addEventListener('input', function (e) {
+      const value = e.target.value.toLowerCase();
+      const filtered = blogData.filter(blog => blog.title.toLowerCase().includes(value) || blog.summary.toLowerCase().includes(value));
+      loadBlogCards(filtered);
+    });
+
+    // Load blogs
     fetch('blog.json')
       .then(res => res.json())
       .then(data => {
-        blogs = data;
-        renderBlogs();
+        blogData = data;
+        loadBlogCards(blogData);
       });
-
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-      renderBlogs(e.target.value);
-    });
   </script>
 </body>
 
