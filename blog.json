@@ -1,11 +1,35 @@
 [
   {
-    "title": "ScreenFlow Pro - a professional screen recording system",
-    "summary": "An advanced screen recorder built with performance and simplicity.",
+    "id": "screenflow-pro",
+    "title": "ScreenFlow Pro - A Professional Screen Recording System",
+    "summary": "Introducing ScreenFlow Pro V3.2: the ultimate screen recording system for developers and content creators.",
     "image": "images/screenflow.png",
-    "link": "blogs/ScreenFlow.html",
-    "author": "Ambarish Mandal",
-    "authorImage": "images/author1.jpg",
-    "date": "2025-06-21"
+    "author": {
+      "name": "Ambarish Mandal",
+      "image": "images/author1.jpg"
+    },
+    "date": "2024-06-20"
+  },
+  {
+    "id": "web-projects",
+    "title": "Website Projects That Matter",
+    "summary": "Explore real-world web projects built during college and freelance journey. From portfolios to SaaS systems.",
+    "image": "images/blog2.jpg",
+    "author": {
+      "name": "Ambarish Mandal",
+      "image": "images/author2.jpg"
+    },
+    "date": "2024-06-15"
+  },
+  {
+    "id": "solar-tracker",
+    "title": "Dual Axis Solar Tracker - Final Year Project",
+    "summary": "Complete breakdown of my final year B.Tech project: design, code, control logic, and real-world deployment.",
+    "image": "images/blog3.jpg",
+    "author": {
+      "name": "Ambarish Mandal",
+      "image": "images/author3.jpg"
+    },
+    "date": "2024-06-10"
   }
 ]
