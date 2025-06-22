@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -125,46 +125,51 @@
       const container = document.getElementById('blog-container');
       container.innerHTML = '';
 
-      data.forEach((blog, index) => {
+      data.forEach(blog => {
+        const viewElementId = `view-${blog.id}`;
         const card = document.createElement('div');
         card.className = 'col-md-4';
+
         card.innerHTML = `
           <div class="blog_card">
             <img src="${blog.image}" alt="${blog.title}">
             <div class="content">
               <h5>${blog.title}</h5>
-              <div class="meta">${blog.date} | <span class="view-count" id="view-${index}">Views: ...</span></div>
+              <div class="meta">${blog.date} | <span class="view-count" id="${viewElementId}">Views: ...</span></div>
               <p>${blog.summary}</p>
-              <button class="btn btn-primary" onclick="openModal(${index})">Read More</button>
+              <button class="btn btn-primary" onclick="openModal('${blog.id}')">Read More</button>
               <div class="author-box">
                 <img src="${blog.author.image}" alt="${blog.author.name}">
                 <span>${blog.author.name}</span>
               </div>
             </div>
-          </div>`;
+          </div>
+        `;
         container.appendChild(card);
-        updateViews(index);
+        updateViews(blog.id, viewElementId);
       });
     }
 
-    function openModal(index) {
-      const blog = blogData[index];
+    function openModal(blogId) {
+      const blog = blogData.find(b => b.id === blogId);
+      if (!blog) return;
       document.getElementById('blogModalTitle').textContent = blog.title;
       document.getElementById('blogModalBody').innerHTML = `<img src="${blog.image}" alt=""><div>${blog.content}</div>`;
       document.getElementById('blogModalMeta').textContent = `${blog.author.name} | ${blog.date}`;
       new bootstrap.Modal(document.getElementById('blogModal')).show();
     }
 
-    function updateViews(index) {
+    function updateViews(blogId, elementId) {
       const namespace = 'ambarish-blog';
-      const key = `post-${index}`;
-      fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`)
+      fetch(`https://api.countapi.xyz/hit/${namespace}/${blogId}`)
         .then(res => res.json())
         .then(data => {
-          document.getElementById(`view-${index}`).textContent = `Views: ${data.value}`;
+          const viewEl = document.getElementById(elementId);
+          if (viewEl) viewEl.textContent = `Views: ${data.value}`;
         });
     }
 
+    // Search filter
     document.getElementById('searchInput').addEventListener('input', function (e) {
       const value = e.target.value.toLowerCase();
       const filtered = blogData.filter(blog =>
@@ -174,7 +179,7 @@
       loadBlogCards(filtered);
     });
 
-    // Load blogs from JSON
+    // Fetch blog data
     fetch('blog.json')
       .then(res => res.json())
       .then(data => {
