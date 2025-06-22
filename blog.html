@@ -5,10 +5,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Blog | Ambarish</title>
-  <link rel="stylesheet" href="css/bootstrap.css">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/responsive.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/bootstrap.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     .blog_section {
       padding: 60px 0;
@@ -77,6 +77,7 @@
       width: 100%;
       height: auto;
       margin-bottom: 15px;
+      border-radius: 10px;
     }
   </style>
 </head>
@@ -99,7 +100,7 @@
 
   <!-- Modal Preview -->
   <div class="modal fade" id="blogModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="blogModalTitle"></h5>
@@ -114,8 +115,9 @@
   </div>
 
   <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="js/jquery-3.4.1.min.js"></script>
-  <script src="js/bootstrap.bundle.js"></script>
+
   <script>
     let blogData = [];
 
@@ -126,7 +128,6 @@
       data.forEach((blog, index) => {
         const card = document.createElement('div');
         card.className = 'col-md-4';
-
         card.innerHTML = `
           <div class="blog_card">
             <img src="${blog.image}" alt="${blog.title}">
@@ -136,12 +137,11 @@
               <p>${blog.summary}</p>
               <button class="btn btn-primary" onclick="openModal(${index})">Read More</button>
               <div class="author-box">
-                <img src="${blog.authorImage}" alt="${blog.author}">
-                <span>${blog.author}</span>
+                <img src="${blog.author.image}" alt="${blog.author.name}">
+                <span>${blog.author.name}</span>
               </div>
             </div>
           </div>`;
-
         container.appendChild(card);
         updateViews(index);
       });
@@ -150,13 +150,12 @@
     function openModal(index) {
       const blog = blogData[index];
       document.getElementById('blogModalTitle').textContent = blog.title;
-      document.getElementById('blogModalBody').innerHTML = `<img src="${blog.image}"><p>${blog.content}</p>`;
-      document.getElementById('blogModalMeta').textContent = `${blog.author} | ${blog.date}`;
+      document.getElementById('blogModalBody').innerHTML = `<img src="${blog.image}" alt=""><div>${blog.content}</div>`;
+      document.getElementById('blogModalMeta').textContent = `${blog.author.name} | ${blog.date}`;
       new bootstrap.Modal(document.getElementById('blogModal')).show();
     }
 
     function updateViews(index) {
-      const blog = blogData[index];
       const namespace = 'ambarish-blog';
       const key = `post-${index}`;
       fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`)
@@ -166,19 +165,25 @@
         });
     }
 
-    // Search
     document.getElementById('searchInput').addEventListener('input', function (e) {
       const value = e.target.value.toLowerCase();
-      const filtered = blogData.filter(blog => blog.title.toLowerCase().includes(value) || blog.summary.toLowerCase().includes(value));
+      const filtered = blogData.filter(blog =>
+        blog.title.toLowerCase().includes(value) ||
+        blog.summary.toLowerCase().includes(value)
+      );
       loadBlogCards(filtered);
     });
 
-    // Load blogs
+    // Load blogs from JSON
     fetch('blog.json')
       .then(res => res.json())
       .then(data => {
         blogData = data;
         loadBlogCards(blogData);
+      })
+      .catch(err => {
+        console.error("Blog loading failed:", err);
+        document.getElementById('blog-container').innerHTML = "<p>Error loading blog posts.</p>";
       });
   </script>
 </body>

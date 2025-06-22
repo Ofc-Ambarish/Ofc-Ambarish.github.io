@@ -1,37 +1,13 @@
-  [
+[
   {
-    "id": "screenflow-pro",
     "title": "ScreenFlow Pro - A Professional Screen Recording System",
     "summary": "Introducing ScreenFlow Pro V3.2: the ultimate screen recording system.",
     "image": "images/screenflow.png",
     "author": {
       "name": "Ambarish Mandal",
-      "image": "images/ambarish.jpg"
+      "image": "images/author1.jpg"
     },
     "date": "2024-06-20",
-    "views": 0,  
-    "content": "<p><strong>ScreenFlow Pro</strong> is a powerful tool designed to capture high-quality screen recordings with audio. It includes features like resolution selector, mic/system audio toggles, and post-processing with FFmpeg to fix WebM durations.</p><p>This version introduces <em>WebM to MP4 auto-conversion</em>, a draggable floating widget, and dark mode support. ScreenFlow Pro V3.2 is your ideal companion for tutorials, webinars, or recording your daily workflow.</p>"
-  },
-  {
-    "id": "web-projects",
-    "title": "Website Projects That Matter",
-    "summary": "Explore real-world web projects built during college and freelance journey. From portfolios to SaaS systems.",
-    "image": "images/blog2.jpg",
-    "author": {
-      "name": "Ambarish Mandal",
-      "image": "images/author2.jpg"
-    },
-    "date": "2024-06-15"
-  },
-  {
-    "id": "solar-tracker",
-    "title": "Dual Axis Solar Tracker - Final Year Project",
-    "summary": "Complete breakdown of my final year B.Tech project: design, code, control logic, and real-world deployment.",
-    "image": "images/blog3.jpg",
-    "author": {
-      "name": "Ambarish Mandal",
-      "image": "images/author3.jpg"
-    },
-    "date": "2024-06-10"
+    "content": "<p><strong>ScreenFlow Pro</strong> is a powerful tool designed to capture high-quality screen recordings with audio. It includes features like resolution selector, mic/system audio toggles, and post-processing with FFmpeg to fix WebM durations.</p><p>This version introduces <em>WebM to MP4 auto-conversion</em>, a draggable floating widget, and dark mode support.</p>"
   }
 ]
