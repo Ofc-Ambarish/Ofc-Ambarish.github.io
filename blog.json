@@ -1,0 +1,20 @@
+[
+  {
+    "title": "ScreenFlow Pro - a professional screen recording system",
+    "image": "images/screenflow.png",
+    "summary": "ScreenFlow-Pro V 3.2 is a powerful tool for Chrome and desktop screen capturing.",
+    "link": "#"
+  },
+  {
+    "title": "Website Projects that Matter",
+    "image": "images/blog2.jpg",
+    "summary": "Here are some real-world web projects I worked on during my college and freelance career...",
+    "link": "#"
+  },
+  {
+    "title": "Dual Axis Solar Tracker Project",
+    "image": "images/blog3.jpg",
+    "summary": "A deep dive into my final year B.Tech project: design, coding, and solar implementation...",
+    "link": "#"
+  }
+]
