@@ -1,20 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   <!-- Basic -->
-  <meta charset="utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <!-- Mobile Metas -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-  <!-- Site Metas -->
-  <meta name="keywords" content="" />
-  <meta name="description" content="" />
-  <meta name="author" content="" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog | Ambarish</title>
+  <!-- External Styles -->
+  <link rel="stylesheet" href="css/bootstrap.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     .blog_section {
       padding: 60px 0;
       background-color: #f7f7f7;
     }
+
     .blog_card {
       background: white;
       border-radius: 10px;
@@ -23,175 +23,136 @@
       margin-bottom: 30px;
       transition: transform 0.3s ease;
     }
+
     .blog_card:hover {
       transform: translateY(-5px);
     }
+
     .blog_card img {
       width: 100%;
       height: 200px;
       object-fit: cover;
     }
+
     .blog_card .content {
       padding: 20px;
     }
+
     .blog_card .content h5 {
       font-weight: 600;
       margin-bottom: 10px;
     }
+
     .blog_card .content p {
       font-size: 14px;
       color: #555;
     }
+
     .blog_card .content .btn {
       margin-top: 15px;
     }
+
     .heading_container h2 {
       text-align: center;
       margin-bottom: 40px;
       font-size: 2rem;
     }
   </style>
-  
-  <!-- slider stylesheet -->
-  <link rel="stylesheet" type="text/css"
-    href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.1.3/assets/owl.carousel.min.css" />
-
-  <!-- bootstrap core css -->
-  <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />
-
-  <!-- fonts style -->
-  <link href="https://fonts.googleapis.com/css?family=Baloo+Chettan|Dosis:400,600,700|Poppins:400,600,700&display=swap"
-    rel="stylesheet" />
-  <!-- Custom styles for this template -->
-  <link href="css/style.css" rel="stylesheet" />
-  <!-- responsive style -->
-  <link href="css/responsive.css" rel="stylesheet" />
 </head>
 
 <body>
-  <!-- Header (shortened for brevity) -->
-   <div class="hero_area">
-    <!-- header section strats -->
+  <div class="hero_area">
+    <!-- Header section -->
     <header class="header_section">
       <div class="container">
         <nav class="navbar navbar-expand-lg custom_nav-container">
           <a class="navbar-brand" href="index.html">
             <img src="images/logo.gif" alt="" />
-            <span>
-              Ambarish
-            </span>
+            <span>Ambarish</span>
           </a>
-          <div class="contact_nav" id="">
-            <ul class="navbar-nav ">
-              <li class="nav-item">
-                <a class="nav-link" href="database.html">
-                  <img src="images/database.jpeg" alt="" />
-                  <span>DBS1</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="service.html">
-                  <img src="images/call.png" alt="" />
-                  <span>Call : + 91 9382259849</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="service.html">
-                  <img src="images/envelope.png" alt="" />
-                  <span>ambarish.ofc@gmail.com</span>
-                </a>
+          <div class="contact_nav">
+            <ul class="navbar-nav">
+              <li class="nav-item"><a class="nav-link" href="database.html"><img src="images/database.jpeg" alt="" /><span>DBS1</span></a></li>
+              <li class="nav-item"><a class="nav-link" href="service.html"><img src="images/call.png" alt="" /><span>Call : +91 9382259849</span></a></li>
+              <li class="nav-item"><a class="nav-link" href="service.html"><img src="images/envelope.png" alt="" /><span>ambarish.ofc@gmail.com</span></a></li>
             </ul>
           </div>
         </nav>
       </div>
-  </header>
-     <!-- slider section -->
-    <section class=" slider_section slider_bg position-relative">
+    </header>
+
+    <!-- Navigation bar -->
+    <section class="slider_section slider_bg position-relative">
       <div class="container">
         <div class="custom_nav2">
-          <nav class="navbar navbar-expand-lg custom_nav-container ">
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-              aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <nav class="navbar navbar-expand-lg custom_nav-container">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
               <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-              <div class="d-flex  flex-column flex-lg-row align-items-center">
-                <ul class="navbar-nav  ">
-                  <li class="nav-item active">
-                    <a class="nav-link" href="index.html">Home <span class="sr-only">(current)</span></a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="database1.html">Database 1</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="database2.html">Database 2</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="contact.html">Contact Us</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="about.html">About </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="#">Login</a>
-                  </li>
-                    </li>
-                 <li class="nav-item">
-                 <a class="nav-link" href="blog.html">Blog</a>
-             </li>
+              <div class="d-flex flex-column flex-lg-row align-items-center">
+                <ul class="navbar-nav">
+                  <li class="nav-item active"><a class="nav-link" href="index.html">Home</a></li>
+                  <li class="nav-item"><a class="nav-link" href="database1.html">Database 1</a></li>
+                  <li class="nav-item"><a class="nav-link" href="database2.html">Database 2</a></li>
+                  <li class="nav-item"><a class="nav-link" href="contact.html">Contact Us</a></li>
+                  <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+                  <li class="nav-item"><a class="nav-link" href="#">Login</a></li>
+                  <li class="nav-item"><a class="nav-link" href="blog.html">Blog</a></li>
                 </ul>
-                <form class="form-inline my-2 my-lg-0 ml-0 ml-lg-4 mb-3 mb-lg-0">
-                  <button class="btn  my-2 my-sm-0 nav_search-btn" type="submit"></button>
-                </form>
               </div>
             </div>
           </nav>
         </div>
       </div>
+    </section>
 
-  <!-- Blog Section -->
-  <section class="blog_section">
-    <div class="container">
-      <div class="heading_container">
-        <h2>Latest Blog Posts</h2>
+    <!-- Blog Section -->
+    <section class="blog_section">
+      <div class="container">
+        <div class="heading_container">
+          <h2>Latest Blog Posts</h2>
+        </div>
+        <div class="row" id="blog-container">
+          <!-- Blog cards will load dynamically here -->
+        </div>
       </div>
-      <div class="row" id="blog-container">
-        <!-- Blog posts will be injected here via JavaScript -->
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Footer -->
-  <section class="container-fluid footer_section">
-    <p>&copy; 2024 All Rights Reserved. Designed by <a href="#">Ambarish</a></p>
-  </section>
+    <!-- Footer -->
+    <section class="container-fluid footer_section">
+      <p>&copy; 2024 All Rights Reserved. Designed by <a href="#">Ambarish</a></p>
+    </section>
+  </div>
 
   <!-- Scripts -->
   <script src="js/jquery-3.4.1.min.js"></script>
   <script src="js/bootstrap.js"></script>
   <script>
-    // Load blogs dynamically
+    // Fetch and render blog data from JSON
     fetch('blog.json')
-      .then(response => response.json())
-      .then(blogs => {
+      .then(res => res.json())
+      .then(data => {
         const container = document.getElementById('blog-container');
-        blogs.forEach(blog => {
-          container.innerHTML += `
-            <div class="col-md-4">
-              <div class="blog_card">
-                <img src="${blog.image}" alt="${blog.title}">
-                <div class="content">
-                  <h5>${blog.title}</h5>
-                  <p>${blog.summary}</p>
-                  <a href="${blog.link}" class="btn btn-primary">Read More</a>
-                </div>
+        data.forEach(blog => {
+          const blogCard = document.createElement('div');
+          blogCard.className = 'col-md-4';
+          blogCard.innerHTML = `
+            <div class="blog_card">
+              <img src="${blog.image}" alt="${blog.title}">
+              <div class="content">
+                <h5>${blog.title}</h5>
+                <p>${blog.summary}</p>
+                <a href="${blog.link}" class="btn btn-primary">Read More</a>
               </div>
-            </div>`;
+            </div>
+          `;
+          container.appendChild(blogCard);
         });
       })
-      .catch(error => {
-        document.getElementById('blog-container').innerHTML = `<p>Error loading blogs.</p>`;
-        console.error(error);
+      .catch(err => {
+        console.error("Failed to load blog posts:", err);
+        document.getElementById('blog-container').innerHTML = `<p>Error loading blog posts.</p>`;
       });
   </script>
 </body>
