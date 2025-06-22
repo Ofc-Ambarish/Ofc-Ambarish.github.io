@@ -5,7 +5,7 @@
     "image": "images/screenflow.png",
     "author": {
       "name": "Ambarish Mandal",
-      "image": "images/author1.jpg"
+      "image": "images/ambarish.jpg"
     },
     "date": "2024-06-20",
     "content": "<p><strong>ScreenFlow Pro</strong> is a powerful tool designed to capture high-quality screen recordings with audio. It includes features like resolution selector, mic/system audio toggles, and post-processing with FFmpeg to fix WebM durations.</p><p>This version introduces <em>WebM to MP4 auto-conversion</em>, a draggable floating widget, and dark mode support.</p>"
