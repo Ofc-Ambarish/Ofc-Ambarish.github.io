@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Blog | Ambarish</title>
-  <!-- External Styles -->
   <link rel="stylesheet" href="css/bootstrap.css">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/responsive.css">
@@ -15,7 +13,6 @@
       padding: 60px 0;
       background-color: #f7f7f7;
     }
-
     .blog_card {
       background: white;
       border-radius: 10px;
@@ -24,35 +21,28 @@
       margin-bottom: 30px;
       transition: transform 0.3s ease;
     }
-
     .blog_card:hover {
       transform: translateY(-5px);
     }
-
     .blog_card img {
       width: 100%;
       height: 200px;
       object-fit: cover;
     }
-
     .blog_card .content {
       padding: 20px;
     }
-
     .blog_card .content h5 {
       font-weight: 600;
       margin-bottom: 10px;
     }
-
     .blog_card .content p {
       font-size: 14px;
       color: #555;
     }
-
     .blog_card .content .btn {
       margin-top: 15px;
     }
-
     .heading_container h2 {
       text-align: center;
       margin-bottom: 40px;
@@ -62,86 +52,24 @@
 </head>
 
 <body>
-   <div class="hero_area">
-    <!-- header section strats -->
-    <header class="header_section">
-      <div class="container">
-        <nav class="navbar navbar-expand-lg custom_nav-container">
-          <a class="navbar-brand" href="index.html">
-            <img src="images/logo.gif" alt="" />
-            <span>
-              Ambarish
-            </span>
-          </a>
-          <div class="contact_nav" id="">
-            <ul class="navbar-nav ">
-              <li class="nav-item">
-                <a class="nav-link" href="database.html">
-                  <img src="images/database.jpeg" alt="" />
-                  <span>DBS1</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="service.html">
-                  <img src="images/call.png" alt="" />
-                  <span>Call : + 91 9382259849</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="service.html">
-                  <img src="images/envelope.png" alt="" />
-                  <span>ambarish.ofc@gmail.com</span>
-                </a>
-            </ul>
-          </div>
-        </nav>
-      </div>
-
-    </header>
-    <!-- end header section -->
-    <!-- slider section -->
-    <section class=" slider_section slider_bg position-relative">
-      <div class="container">
-        <div class="custom_nav2">
-          <nav class="navbar navbar-expand-lg custom_nav-container ">
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-              aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-              <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-              <div class="d-flex  flex-column flex-lg-row align-items-center">
-                <ul class="navbar-nav  ">
-                  <li class="nav-item active">
-                    <a class="nav-link" href="index.html">Home <span class="sr-only">(current)</span></a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="database1.html">Database 1</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="database2.html">Database 2</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="contact.html">Contact Us</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="about.html">About </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="#">Login</a>
-                  </li>
-                    </li>
-                 <li class="nav-item">
-                 <a class="nav-link" href="blog.html">Blog</a>
-             </li>
-                </ul>
-                <form class="form-inline my-2 my-lg-0 ml-0 ml-lg-4 mb-3 mb-lg-0">
-                  <button class="btn  my-2 my-sm-0 nav_search-btn" type="submit"></button>
-                </form>
-              </div>
-            </div>
-          </nav>
-        </div>
-      </div>
+  <!-- Header (shortened for brevity) -->
+  <header class="header_section">
+    <div class="container">
+      <nav class="navbar navbar-expand-lg custom_nav-container">
+        <a class="navbar-brand" href="index.html">
+          <img src="images/logo.gif" alt="" />
+          <span>Ambarish</span>
+        </a>
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="database1.html">DBS 1</a></li>
+          <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+          <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
+          <li class="nav-item active"><a class="nav-link" href="blog.html">Blog</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
 
   <!-- Blog Section -->
   <section class="blog_section">
@@ -149,49 +77,13 @@
       <div class="heading_container">
         <h2>Latest Blog Posts</h2>
       </div>
-      <div class="row">
-
-        <!-- Blog Card 1 -->
-        <div class="col-md-4">
-          <div class="blog_card">
-            <img src="images/screenflow.png" alt="screenflow">
-            <div class="content">
-              <h5>ScreenFlow Pro - a professional screen recording system</h5>
-              <p>ScreenFlow-Pro V 3.2</p>
-              <a href="#" class="btn btn-primary">Read More</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Blog Card 2 -->
-        <div class="col-md-4">
-          <div class="blog_card">
-            <img src="images/blog2.jpg" alt="Blog 2">
-            <div class="content">
-              <h5>Website Projects that Matter</h5>
-              <p>Here are some real-world web projects I worked on during my college and freelance career...</p>
-              <a href="#" class="btn btn-primary">Read More</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Blog Card 3 -->
-        <div class="col-md-4">
-          <div class="blog_card">
-            <img src="images/blog3.jpg" alt="Blog 3">
-            <div class="content">
-              <h5>Dual Axis Solar Tracker Project</h5>
-              <p>A deep dive into my final year B.Tech project: design, coding, and solar implementation...</p>
-              <a href="#" class="btn btn-primary">Read More</a>
-            </div>
-          </div>
-        </div>
-
+      <div class="row" id="blog-container">
+        <!-- Blog posts will be injected here via JavaScript -->
       </div>
     </div>
   </section>
 
-  <!-- Reuse your footer -->
+  <!-- Footer -->
   <section class="container-fluid footer_section">
     <p>&copy; 2024 All Rights Reserved. Designed by <a href="#">Ambarish</a></p>
   </section>
@@ -199,6 +91,30 @@
   <!-- Scripts -->
   <script src="js/jquery-3.4.1.min.js"></script>
   <script src="js/bootstrap.js"></script>
+  <script>
+    // Load blogs dynamically
+    fetch('blog.json')
+      .then(response => response.json())
+      .then(blogs => {
+        const container = document.getElementById('blog-container');
+        blogs.forEach(blog => {
+          container.innerHTML += `
+            <div class="col-md-4">
+              <div class="blog_card">
+                <img src="${blog.image}" alt="${blog.title}">
+                <div class="content">
+                  <h5>${blog.title}</h5>
+                  <p>${blog.summary}</p>
+                  <a href="${blog.link}" class="btn btn-primary">Read More</a>
+                </div>
+              </div>
+            </div>`;
+        });
+      })
+      .catch(error => {
+        document.getElementById('blog-container').innerHTML = `<p>Error loading blogs.</p>`;
+        console.error(error);
+      });
+  </script>
 </body>
-
 </html>
