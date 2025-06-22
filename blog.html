@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog | Ambarish</title>
+  <!-- External Styles -->
+  <link rel="stylesheet" href="css/bootstrap.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    .blog_section {
+      padding: 60px 0;
+      background-color: #f7f7f7;
+    }
+
+    .blog_card {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+      transition: transform 0.3s ease;
+    }
+
+    .blog_card:hover {
+      transform: translateY(-5px);
+    }
+
+    .blog_card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .blog_card .content {
+      padding: 20px;
+    }
+
+    .blog_card .content h5 {
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .blog_card .content p {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .blog_card .content .btn {
+      margin-top: 15px;
+    }
+
+    .heading_container h2 {
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 2rem;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Reuse your header/navbar from index.html -->
+  <header class="header_section">
+    <div class="container">
+      <nav class="navbar navbar-expand-lg custom_nav-container">
+        <a class="navbar-brand" href="index.html">
+          <img src="images/logo.gif" alt="" />
+          <span>Ambarish</span>
+        </a>
+        <div class="contact_nav" id="">
+          <ul class="navbar-nav ">
+            <li class="nav-item"><a class="nav-link" href="database.html"><img src="images/database.jpeg" alt=""><span>DBS1</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><img src="images/call.png" alt=""><span>+91 9382259849</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><img src="images/envelope.png" alt=""><span>ambarish.ofc@gmail.com</span></a></li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Blog Section -->
+  <section class="blog_section">
+    <div class="container">
+      <div class="heading_container">
+        <h2>Latest Blog Posts</h2>
+      </div>
+      <div class="row">
+
+        <!-- Blog Card 1 -->
+        <div class="col-md-4">
+          <div class="blog_card">
+            <img src="images/blog1.jpg" alt="Blog 1">
+            <div class="content">
+              <h5>How I Built My First Android App</h5>
+              <p>Sharing my journey and lessons learned from building my first Android project using Java...</p>
+              <a href="#" class="btn btn-primary">Read More</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Blog Card 2 -->
+        <div class="col-md-4">
+          <div class="blog_card">
+            <img src="images/blog2.jpg" alt="Blog 2">
+            <div class="content">
+              <h5>Website Projects that Matter</h5>
+              <p>Here are some real-world web projects I worked on during my college and freelance career...</p>
+              <a href="#" class="btn btn-primary">Read More</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Blog Card 3 -->
+        <div class="col-md-4">
+          <div class="blog_card">
+            <img src="images/blog3.jpg" alt="Blog 3">
+            <div class="content">
+              <h5>Dual Axis Solar Tracker Project</h5>
+              <p>A deep dive into my final year B.Tech project: design, coding, and solar implementation...</p>
+              <a href="#" class="btn btn-primary">Read More</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Reuse your footer -->
+  <section class="container-fluid footer_section">
+    <p>&copy; 2024 All Rights Reserved. Designed by <a href="#">Ambarish</a></p>
+  </section>
+
+  <!-- Scripts -->
+  <script src="js/jquery-3.4.1.min.js"></script>
+  <script src="js/bootstrap.js"></script>
+</body>
+
+</html>
