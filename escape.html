@@ -5,7 +5,8 @@
   <title>Chat App with Video Calls</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
- <style>
+
+<style>
     /* Body Background */
     body {
       background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
@@ -378,6 +379,16 @@
       background: #121212;
       color: #e0e0e0;
     }
+    body {
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: #333;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark-mode {
+      background: #121212;
+      color: #e0e0e0;
+    }
     /* ... rest of your CSS ... */
     #debugInfo {
       position: fixed;
@@ -390,6 +401,7 @@
       font-size: 12px;
       max-width: 300px;
       display: none;
+      z-index: 10001;
     }
   </style>
 </head>
@@ -1104,8 +1116,9 @@
       callInProgress = true;
       isCaller = false;
       
-      debugLog('Handling incoming call: ' + callId);
-      debugLog('Call data: ', callData);
+      debugLog('*** INCOMING CALL FOR CURRENT USER ***');
+      debugLog('Call ID: ' + callId);
+      debugLog('Call data: ' + JSON.stringify(callData));
       
       // Show incoming call UI
       callStatus.textContent = "Incoming Call";
@@ -1210,20 +1223,33 @@
         const callId = snapshot.key;
         const callData = snapshot.val();
         
-        debugLog('New call detected: ' + callId);
-        debugLog('Call data - caller: ' + callData.callerId + ', receiver: ' + callData.receiverId + ', status: ' + callData.status);
-        debugLog('Current user: ' + currentUserId);
+        debugLog('--- NEW CALL DETECTED ---');
+        debugLog('Call ID: ' + callId);
+        debugLog('Caller ID: ' + callData.callerId);
+        debugLog('Receiver ID: ' + callData.receiverId);
+        debugLog('Status: ' + callData.status);
+        debugLog('Current User ID: ' + currentUserId);
+        debugLog('Call in progress: ' + callInProgress);
         
         // Check if this call is for current user and not initiated by them
-        if (callData.receiverId === currentUserId && 
-            callData.callerId !== currentUserId && 
-            callData.status === "calling" &&
-            !callInProgress) {
-          debugLog('*** INCOMING CALL FOR CURRENT USER ***');
+        const isForCurrentUser = callData.receiverId === currentUserId;
+        const isNotFromCurrentUser = callData.callerId !== currentUserId;
+        const isCallingStatus = callData.status === "calling";
+        const noCallInProgress = !callInProgress;
+        
+        debugLog('Conditions:');
+        debugLog('  - Is for current user: ' + isForCurrentUser);
+        debugLog('  - Is not from current user: ' + isNotFromCurrentUser);
+        debugLog('  - Is calling status: ' + isCallingStatus);
+        debugLog('  - No call in progress: ' + noCallInProgress);
+        
+        if (isForCurrentUser && isNotFromCurrentUser && isCallingStatus && noCallInProgress) {
+          debugLog('*** INCOMING CALL FOR CURRENT USER - HANDLING ***');
           handleIncomingCall(callId, callData);
         } else {
-          debugLog('Call not for current user or wrong status');
+          debugLog('Call not for current user or conditions not met');
         }
+        debugLog('--- END CALL CHECK ---');
       });
 
       // Also listen for call updates to handle cases where call might be modified
@@ -1250,8 +1276,10 @@
         document.getElementById("loginDiv").style.display = "none";
         document.getElementById("chatDiv").style.display = "block";
         
-        debugLog('User authenticated: ' + user.email);
+        debugLog('=== USER AUTHENTICATED ===');
+        debugLog('User email: ' + user.email);
         debugLog('Current user ID: ' + currentUserId);
+        debugLog('=== AUTH COMPLETE ===');
       } else {
         document.getElementById("loginDiv").style.display = "block";
         document.getElementById("chatDiv").style.display = "none";
@@ -1266,3 +1294,7 @@
   </script>
 </body>
 </html>
+
+
+
+
