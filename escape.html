@@ -5,8 +5,7 @@
   <title>Chat App with Video Calls</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-
-<style>
+  <style>
     /* Body Background */
     body {
       background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
@@ -367,47 +366,20 @@
       font-size: 12px;
       max-width: 300px;
       display: none;
-    }
-  
-    body {
-      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      color: #333;
-      transition: background 0.3s, color 0.3s;
-    }
-    body.dark-mode {
-      background: #121212;
-      color: #e0e0e0;
-    }
-    body {
-      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      color: #333;
-      transition: background 0.3s, color 0.3s;
-    }
-    body.dark-mode {
-      background: #121212;
-      color: #e0e0e0;
-    }
-    /* ... rest of your CSS ... */
-    #debugInfo {
-      position: fixed;
-      bottom: 10px;
-      left: 10px;
-      background: rgba(0,0,0,0.8);
-      color: white;
-      padding: 10px;
-      border-radius: 5px;
-      font-size: 12px;
-      max-width: 300px;
-      display: none;
       z-index: 10001;
     }
   </style>
 </head>
 <body class="d-flex align-items-center justify-content-center vh-100">
-  <!-- Your existing HTML structure -->
-  <div id="hiddenTap" style="position:fixed;top:0;left:0;width:50px;height:50px;opacity:0;z-index:9999;"></div>
+  <div id="hiddenTap" style="
+    position:fixed;
+    top:0;
+    left:0;
+    width:50px;
+    height:50px;
+    opacity:0;
+    z-index:9999;
+  "></div>
   
   <div id="errorPage" class="text-center" style="display:block;">
     <h1 class="display-4 text-danger">Oops!</h1>
@@ -416,7 +388,6 @@
   </div>
 
   <div id="chatApp" class="container" style="display:none;max-width:600px;">
-    <!-- Your existing login and chat UI -->
     <div id="loginDiv">
       <h3 class="mb-3 text-center">Register Or Login</h3>
       <input id="email" type="email" placeholder="Email" class="form-control mb-2" />
@@ -542,6 +513,22 @@
       debugInfo.innerHTML += `[${timestamp}] ${message}<br>`;
       debugInfo.scrollTop = debugInfo.scrollHeight;
       debugInfo.style.display = 'block';
+    }
+
+    // Clear old ended calls from Firebase
+    function clearOldCalls() {
+      debugLog('Clearing old ended calls...');
+      db.ref("calls").once('value').then((snapshot) => {
+        const calls = snapshot.val();
+        if (calls) {
+          Object.keys(calls).forEach(callId => {
+            if (calls[callId].status === "ended") {
+              db.ref(`calls/${callId}`).remove();
+              debugLog('Removed old call: ' + callId);
+            }
+          });
+        }
+      });
     }
 
     // Date formatting functions
@@ -1079,13 +1066,17 @@
       declineCallBtn.style.display = "none";
       endCallBtn.style.display = "block";
       
-      // Create call in Firebase
+      // Create call in Firebase - MAKE SURE STATUS IS "calling"
       db.ref(`calls/${currentCallId}`).set({
         callerId: currentUserId,
         receiverId: otherUserId,
-        status: "calling",
+        status: "calling",  // This must be "calling" not "ended"
         timestamp: Date.now(),
         type: "video"
+      }).then(() => {
+        debugLog('Call created with status: calling');
+      }).catch((error) => {
+        debugLog('Error creating call: ' + error.message);
       });
       
       // Start the call process
@@ -1217,7 +1208,7 @@
     // Set up end call button
     endCallBtn.onclick = endCall;
 
-    // Listen for incoming calls - FIXED CALL DETECTION
+    // Listen for incoming calls
     function listenForCalls() {
       db.ref("calls").on("child_added", (snapshot) => {
         const callId = snapshot.key;
@@ -1279,6 +1270,10 @@
         debugLog('=== USER AUTHENTICATED ===');
         debugLog('User email: ' + user.email);
         debugLog('Current user ID: ' + currentUserId);
+        
+        // Clear old calls when user logs in
+        clearOldCalls();
+        
         debugLog('=== AUTH COMPLETE ===');
       } else {
         document.getElementById("loginDiv").style.display = "block";
@@ -1294,7 +1289,3 @@
   </script>
 </body>
 </html>
-
-
-
-
