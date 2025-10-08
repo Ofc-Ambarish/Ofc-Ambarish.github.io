@@ -493,7 +493,7 @@
     const remoteVideo = document.getElementById("remoteVideo");
     const debugInfo = document.getElementById("debugInfo");
 
-    // Enhanced WebRTC configuration with multiple STUN servers
+    // WebRTC configuration
     const configuration = {
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
@@ -816,7 +816,7 @@
       }
     });
 
-    // WebRTC Functions - FIXED ICE CANDIDATE HANDLING
+    // WebRTC Functions
     async function createPeerConnection() {
       try {
         debugLog('Creating peer connection...');
@@ -838,18 +838,12 @@
           debugLog('Remote video stream set');
         };
         
-        // Handle ICE candidates - FIXED: Proper candidate validation and storage
+        // Handle ICE candidates
         peerConnection.onicecandidate = (event) => {
           if (event.candidate) {
             debugLog('New ICE candidate: ' + event.candidate.candidate);
-            // Store the complete candidate object
-            const candidateData = {
-              candidate: event.candidate.candidate,
-              sdpMid: event.candidate.sdpMid,
-              sdpMLineIndex: event.candidate.sdpMLineIndex,
-              usernameFragment: event.candidate.usernameFragment
-            };
-            db.ref(`calls/${currentCallId}/candidates/${currentUserId}`).push(candidateData);
+            // Store candidate directly
+            db.ref(`calls/${currentCallId}/candidates/${currentUserId}`).push(event.candidate.toJSON());
           } else {
             debugLog('All ICE candidates have been generated');
           }
@@ -922,26 +916,20 @@
           }
         });
         
-        // Listen for ICE candidates - FIXED: Proper candidate retrieval
-        db.ref(`calls/${currentCallId}/candidates`).on('child_added', async (snapshot) => {
+        // Listen for ICE candidates from the other user
+        const otherUserId = currentCallId.split('_')[1];
+        db.ref(`calls/${currentCallId}/candidates/${otherUserId}`).on('child_added', async (snapshot) => {
           const candidateData = snapshot.val();
-          if (candidateData.from !== currentUserId && peerConnection.remoteDescription) {
+          if (peerConnection.remoteDescription) {
             try {
-              debugLog('Processing ICE candidate from peer: ' + candidateData.candidate);
+              debugLog('Processing ICE candidate from peer');
               
-              // Validate candidate data exists
-              if (!candidateData.candidate) {
+              if (!candidateData || !candidateData.candidate) {
                 debugLog('No candidate data found');
                 return;
               }
               
-              const candidate = new RTCIceCandidate({
-                candidate: candidateData.candidate,
-                sdpMid: candidateData.sdpMid || null,
-                sdpMLineIndex: candidateData.sdpMLineIndex || null,
-                usernameFragment: candidateData.usernameFragment || null
-              });
-              
+              const candidate = new RTCIceCandidate(candidateData);
               await peerConnection.addIceCandidate(candidate);
               debugLog('Added ICE candidate from peer');
             } catch (error) {
@@ -1007,26 +995,20 @@
         });
         debugLog('Answer sent to Firebase');
         
-        // Listen for ICE candidates - FIXED: Proper candidate retrieval
-        db.ref(`calls/${currentCallId}/candidates`).on('child_added', async (snapshot) => {
+        // Listen for ICE candidates from the caller
+        const callerId = currentCallId.split('_')[0];
+        db.ref(`calls/${currentCallId}/candidates/${callerId}`).on('child_added', async (snapshot) => {
           const candidateData = snapshot.val();
-          if (candidateData.from !== currentUserId && peerConnection.remoteDescription) {
+          if (peerConnection.remoteDescription) {
             try {
-              debugLog('Processing ICE candidate from peer: ' + candidateData.candidate);
+              debugLog('Processing ICE candidate from peer');
               
-              // Validate candidate data exists
-              if (!candidateData.candidate) {
+              if (!candidateData || !candidateData.candidate) {
                 debugLog('No candidate data found');
                 return;
               }
               
-              const candidate = new RTCIceCandidate({
-                candidate: candidateData.candidate,
-                sdpMid: candidateData.sdpMid || null,
-                sdpMLineIndex: candidateData.sdpMLineIndex || null,
-                usernameFragment: candidateData.usernameFragment || null
-              });
-              
+              const candidate = new RTCIceCandidate(candidateData);
               await peerConnection.addIceCandidate(candidate);
               debugLog('Added ICE candidate from peer');
             } catch (error) {
@@ -1152,7 +1134,15 @@
         db.ref(`calls/${currentCallId}`).off();
         db.ref(`calls/${currentCallId}/offer`).off();
         db.ref(`calls/${currentCallId}/answer`).off();
-        db.ref(`calls/${currentCallId}/candidates`).off();
+        
+        // Clean up candidate listeners
+        const callParts = currentCallId.split('_');
+        if (callParts.length >= 2) {
+          const otherUserId = isCaller ? callParts[1] : callParts[0];
+          db.ref(`calls/${currentCallId}/candidates/${otherUserId}`).off();
+        }
+        db.ref(`calls/${currentCallId}/candidates/${currentUserId}`).off();
+        
         db.ref(`calls/${currentCallId}/status`).off();
         
         // Remove the call data after a delay
