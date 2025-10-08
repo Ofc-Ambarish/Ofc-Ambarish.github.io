@@ -355,6 +355,18 @@
     #videoContainer.active {
       display: flex;
     }
+    #debugInfo {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      max-width: 300px;
+      display: none;
+    }
   </style>
 </head>
 <body class="d-flex align-items-center justify-content-center vh-100">
@@ -432,6 +444,8 @@
     <span class="emoji" onclick="selectReaction('🎉')">🎉</span>
   </div>
 
+  <div id="debugInfo"></div>
+
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -477,14 +491,32 @@
     const endCallBtn = document.getElementById("endCall");
     const localVideo = document.getElementById("localVideo");
     const remoteVideo = document.getElementById("remoteVideo");
+    const debugInfo = document.getElementById("debugInfo");
 
-    // WebRTC configuration
+    // Enhanced WebRTC configuration with multiple STUN servers
     const configuration = {
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
-      ]
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun3.l.google.com:19302' },
+        { urls: 'stun:stun4.l.google.com:19302' },
+        { 
+          urls: 'turn:numb.viagenie.ca',
+          credential: 'muazkh',
+          username: 'webrtc@live.com'
+        }
+      ],
+      iceCandidatePoolSize: 10
     };
+
+    // Debug logging
+    function debugLog(message) {
+      console.log(message);
+      debugInfo.innerHTML += message + '<br>';
+      debugInfo.scrollTop = debugInfo.scrollHeight;
+      debugInfo.style.display = 'block';
+    }
 
     // Date formatting functions
     function formatDate(timestamp) {
@@ -792,114 +824,125 @@
     // WebRTC Functions
     async function createPeerConnection() {
       try {
+        debugLog('Creating peer connection...');
         peerConnection = new RTCPeerConnection(configuration);
         
         // Add local stream to connection
         if (localStream) {
           localStream.getTracks().forEach(track => {
             peerConnection.addTrack(track, localStream);
+            debugLog(`Added track: ${track.kind}`);
           });
         }
         
         // Get remote stream
         peerConnection.ontrack = (event) => {
+          debugLog('Received remote track');
           remoteVideo.srcObject = event.streams[0];
           remoteStream = event.streams[0];
+          debugLog('Remote video stream set');
         };
         
-        // Handle ICE candidates - FIXED: Proper candidate validation
+        // Handle ICE candidates
         peerConnection.onicecandidate = (event) => {
           if (event.candidate) {
-            // Only send valid candidates
+            debugLog('New ICE candidate: ' + event.candidate.candidate);
             const candidate = event.candidate.toJSON();
             db.ref(`calls/${currentCallId}/candidates/${currentUserId}`).push({
               candidate: candidate,
               from: currentUserId
             });
+          } else {
+            debugLog('All ICE candidates have been generated');
           }
         };
         
         // Handle connection state changes
         peerConnection.onconnectionstatechange = () => {
-          console.log('Connection state:', peerConnection.connectionState);
+          debugLog('Connection state: ' + peerConnection.connectionState);
+          callStatus.textContent = "Call " + peerConnection.connectionState;
+          
           if (peerConnection.connectionState === 'connected') {
             callStatus.textContent = "Call Connected";
             videoContainer.classList.add('active');
+            debugLog('Call connected successfully!');
           } else if (peerConnection.connectionState === 'disconnected' || 
                      peerConnection.connectionState === 'failed') {
+            debugLog('Call disconnected or failed');
             endCall();
           }
+        };
+        
+        // Handle ICE connection state
+        peerConnection.oniceconnectionstatechange = () => {
+          debugLog('ICE connection state: ' + peerConnection.iceConnectionState);
         };
         
         return peerConnection;
       } catch (error) {
         console.error('Error creating peer connection:', error);
+        debugLog('Error creating peer connection: ' + error.message);
         alert('Error starting call: ' + error.message);
       }
     }
 
     async function startCall() {
       try {
+        debugLog('Starting call as caller...');
+        
         // Get user media
         localStream = await navigator.mediaDevices.getUserMedia({ 
           video: true, 
           audio: true 
         });
         localVideo.srcObject = localStream;
+        debugLog('Local media stream obtained');
         
         // Create peer connection
         await createPeerConnection();
         
-        if (isCaller) {
-          // Create offer
-          const offer = await peerConnection.createOffer();
-          await peerConnection.setLocalDescription(offer);
-          
-          // Send offer to Firebase
-          db.ref(`calls/${currentCallId}`).update({
-            offer: offer,
-            from: currentUserId
-          });
-        }
+        // Create offer
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        debugLog('Created and set local offer');
+        
+        // Send offer to Firebase
+        db.ref(`calls/${currentCallId}`).update({
+          offer: offer,
+          from: currentUserId,
+          timestamp: Date.now()
+        });
+        debugLog('Offer sent to Firebase');
         
         // Listen for answers
         db.ref(`calls/${currentCallId}/answer`).on('value', async (snapshot) => {
           const answer = snapshot.val();
           if (answer && answer.from !== currentUserId) {
+            debugLog('Received answer from peer');
             await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+            debugLog('Set remote description from answer');
           }
         });
         
-        // Listen for ICE candidates - FIXED: Proper candidate handling
+        // Listen for ICE candidates
         db.ref(`calls/${currentCallId}/candidates`).on('child_added', async (snapshot) => {
           const candidateData = snapshot.val();
           if (candidateData.from !== currentUserId && peerConnection.remoteDescription) {
             try {
-              // Create a proper RTCIceCandidate with fallback for null values
-              const candidate = new RTCIceCandidate({
-                candidate: candidateData.candidate.candidate,
-                sdpMid: candidateData.candidate.sdpMid || undefined,
-                sdpMLineIndex: candidateData.candidate.sdpMLineIndex || undefined,
-                usernameFragment: candidateData.candidate.usernameFragment || undefined
-              });
+              debugLog('Processing ICE candidate from peer');
+              const candidate = new RTCIceCandidate(candidateData.candidate);
               await peerConnection.addIceCandidate(candidate);
+              debugLog('Added ICE candidate from peer');
             } catch (error) {
               console.warn('Error adding ICE candidate:', error);
-              // Try with minimal candidate data as fallback
-              try {
-                const fallbackCandidate = new RTCIceCandidate({
-                  candidate: candidateData.candidate.candidate
-                });
-                await peerConnection.addIceCandidate(fallbackCandidate);
-              } catch (fallbackError) {
-                console.error('Failed to add ICE candidate even with fallback:', fallbackError);
-              }
+              debugLog('Error adding ICE candidate: ' + error.message);
             }
           }
         });
         
       } catch (error) {
         console.error('Error starting call:', error);
+        debugLog('Error starting call: ' + error.message);
         alert('Error starting call: ' + error.message);
         endCall();
       }
@@ -907,64 +950,71 @@
 
     async function answerCall() {
       try {
+        debugLog('Answering call as receiver...');
+        
         // Get user media
         localStream = await navigator.mediaDevices.getUserMedia({ 
           video: true, 
           audio: true 
         });
         localVideo.srcObject = localStream;
+        debugLog('Local media stream obtained');
         
         // Create peer connection
         await createPeerConnection();
         
-        // Listen for offer
-        db.ref(`calls/${currentCallId}/offer`).on('value', async (snapshot) => {
-          const offer = snapshot.val();
-          if (offer && offer.from !== currentUserId) {
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-            
-            // Create answer
-            const answer = await peerConnection.createAnswer();
-            await peerConnection.setLocalDescription(answer);
-            
-            // Send answer to Firebase
-            db.ref(`calls/${currentCallId}/answer`).set({
-              ...answer,
-              from: currentUserId
-            });
-          }
+        // Listen for offer with timeout
+        const offerPromise = new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            reject(new Error('Offer timeout'));
+          }, 10000);
+          
+          db.ref(`calls/${currentCallId}/offer`).on('value', async (snapshot) => {
+            const offer = snapshot.val();
+            if (offer && offer.from !== currentUserId) {
+              clearTimeout(timeout);
+              resolve(offer);
+            }
+          });
         });
         
-        // Listen for ICE candidates - FIXED: Proper candidate handling
+        const offer = await offerPromise;
+        debugLog('Received offer from caller');
+        
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+        debugLog('Set remote description from offer');
+        
+        // Create answer
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        debugLog('Created and set local answer');
+        
+        // Send answer to Firebase
+        db.ref(`calls/${currentCallId}/answer`).set({
+          ...answer,
+          from: currentUserId
+        });
+        debugLog('Answer sent to Firebase');
+        
+        // Listen for ICE candidates
         db.ref(`calls/${currentCallId}/candidates`).on('child_added', async (snapshot) => {
           const candidateData = snapshot.val();
           if (candidateData.from !== currentUserId && peerConnection.remoteDescription) {
             try {
-              // Create a proper RTCIceCandidate with fallback for null values
-              const candidate = new RTCIceCandidate({
-                candidate: candidateData.candidate.candidate,
-                sdpMid: candidateData.candidate.sdpMid || undefined,
-                sdpMLineIndex: candidateData.candidate.sdpMLineIndex || undefined,
-                usernameFragment: candidateData.candidate.usernameFragment || undefined
-              });
+              debugLog('Processing ICE candidate from peer');
+              const candidate = new RTCIceCandidate(candidateData.candidate);
               await peerConnection.addIceCandidate(candidate);
+              debugLog('Added ICE candidate from peer');
             } catch (error) {
               console.warn('Error adding ICE candidate:', error);
-              // Try with minimal candidate data as fallback
-              try {
-                const fallbackCandidate = new RTCIceCandidate({
-                  candidate: candidateData.candidate.candidate
-                });
-                await peerConnection.addIceCandidate(fallbackCandidate);
-              } catch (fallbackError) {
-                console.error('Failed to add ICE candidate even with fallback:', fallbackError);
-              }
+              debugLog('Error adding ICE candidate: ' + error.message);
             }
           }
         });
         
       } catch (error) {
         console.error('Error answering call:', error);
+        debugLog('Error answering call: ' + error.message);
         alert('Error answering call: ' + error.message);
         endCall();
       }
@@ -980,6 +1030,8 @@
       isCaller = true;
       currentCallId = `${currentUserId}_${otherUserId}_${Date.now()}`;
       callInProgress = true;
+      
+      debugLog('Initiating call with ID: ' + currentCallId);
       
       // Show calling UI
       callStatus.textContent = "Calling...";
@@ -1004,6 +1056,8 @@
       // Listen for call response
       db.ref(`calls/${currentCallId}/status`).on('value', (snapshot) => {
         const status = snapshot.val();
+        debugLog('Call status update: ' + status);
+        
         if (status === "accepted") {
           callStatus.textContent = "Call Connected";
         } else if (status === "declined" || status === "ended") {
@@ -1024,6 +1078,8 @@
       callInProgress = true;
       isCaller = false;
       
+      debugLog('Handling incoming call: ' + callId);
+      
       // Show incoming call UI
       callStatus.textContent = "Incoming Call";
       callerInfo.textContent = `From: ${callData.callerId}`;
@@ -1039,9 +1095,14 @@
           callerInfo.textContent = `From: ${userData.email}`;
         }
       });
+      
+      // Set up button handlers
+      acceptCallBtn.onclick = acceptIncomingCall;
+      declineCallBtn.onclick = declineIncomingCall;
     }
 
     function acceptIncomingCall() {
+      debugLog('Accepting incoming call');
       db.ref(`calls/${currentCallId}/status`).set("accepted");
       callStatus.textContent = "Connecting...";
       acceptCallBtn.style.display = "none";
@@ -1051,18 +1112,31 @@
     }
 
     function declineIncomingCall() {
+      debugLog('Declining incoming call');
       db.ref(`calls/${currentCallId}/status`).set("declined");
       callStatus.textContent = "Call Declined";
       setTimeout(endCall, 2000);
     }
 
     function endCall() {
+      debugLog('Ending call');
+      
       if (currentCallId) {
         db.ref(`calls/${currentCallId}/status`).set("ended");
-        // Clean up call data after a delay
+        
+        // Clean up Firebase listeners
+        db.ref(`calls/${currentCallId}`).off();
+        db.ref(`calls/${currentCallId}/offer`).off();
+        db.ref(`calls/${currentCallId}/answer`).off();
+        db.ref(`calls/${currentCallId}/candidates`).off();
+        db.ref(`calls/${currentCallId}/status`).off();
+        
+        // Remove the call data after a delay
         setTimeout(() => {
           db.ref(`calls/${currentCallId}`).remove();
         }, 5000);
+        
+        currentCallId = null;
       }
       
       // Close peer connection
@@ -1077,18 +1151,22 @@
         localStream = null;
       }
       
+      if (remoteStream) {
+        remoteStream.getTracks().forEach(track => track.stop());
+        remoteStream = null;
+      }
+      
       // Reset UI
+      callInProgress = false;
       callContainer.classList.remove("active");
       videoContainer.classList.remove("active");
-      callInProgress = false;
-      currentCallId = null;
-      isCaller = false;
+      localVideo.srcObject = null;
+      remoteVideo.srcObject = null;
+      debugLog('Call ended and cleaned up');
     }
 
-    // Call button event listeners
-    acceptCallBtn.addEventListener("click", acceptIncomingCall);
-    declineCallBtn.addEventListener("click", declineIncomingCall);
-    endCallBtn.addEventListener("click", endCall);
+    // Set up end call button
+    endCallBtn.onclick = endCall;
 
     // Listen for incoming calls
     function listenForCalls() {
@@ -1096,43 +1174,47 @@
         const callId = snapshot.key;
         const callData = snapshot.val();
         
-        // Check if this call is for current user
-        if (callData.receiverId === currentUserId && callData.status === "calling") {
+        debugLog('New call detected: ' + callId);
+        
+        // Check if this call is for current user and not initiated by them
+        if (callData.receiverId === currentUserId && 
+            callData.callerId !== currentUserId && 
+            callData.status === "calling" &&
+            !callInProgress) {
+          debugLog('Incoming call for current user');
           handleIncomingCall(callId, callData);
         }
       });
     }
 
-    // Auth state listener
+    // Auth state
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(console.error);
+
     auth.onAuthStateChanged((user) => {
       if (user) {
         currentUserId = user.uid;
+        db.ref(`users/${currentUserId}`).update({ online: true });
+        db.ref(`users/${currentUserId}`).onDisconnect().update({
+          online: false,
+          lastOnline: firebase.database.ServerValue.TIMESTAMP
+        });
+        loadUsers();
+        listenForCalls();
         document.getElementById("loginDiv").style.display = "none";
         document.getElementById("chatDiv").style.display = "block";
         
-        // Update user status
-        db.ref("users/" + currentUserId).update({ online: true });
-        
-        // Load users and listen for calls
-        loadUsers();
-        listenForCalls();
-        
-        // Set up offline status
-        window.addEventListener("beforeunload", () => {
-          db.ref("users/" + currentUserId).update({ 
-            online: false, 
-            lastOnline: Date.now() 
-          });
-        });
+        debugLog('User authenticated: ' + user.email);
       } else {
         document.getElementById("loginDiv").style.display = "block";
         document.getElementById("chatDiv").style.display = "none";
+        debugLog('User logged out');
       }
     });
 
     // Mobile device detection
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     console.log("Mobile device detected:", isMobile);
+    debugLog("Mobile device: " + isMobile);
   </script>
 </body>
 </html>
