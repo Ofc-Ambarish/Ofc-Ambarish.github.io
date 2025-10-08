@@ -500,12 +500,7 @@
         { urls: 'stun:stun1.l.google.com:19302' },
         { urls: 'stun:stun2.l.google.com:19302' },
         { urls: 'stun:stun3.l.google.com:19302' },
-        { urls: 'stun:stun4.l.google.com:19302' },
-        { 
-          urls: 'turn:numb.viagenie.ca',
-          credential: 'muazkh',
-          username: 'webrtc@live.com'
-        }
+        { urls: 'stun:stun4.l.google.com:19302' }
       ],
       iceCandidatePoolSize: 10
     };
@@ -821,7 +816,7 @@
       }
     });
 
-    // WebRTC Functions
+    // WebRTC Functions - FIXED ICE CANDIDATE HANDLING
     async function createPeerConnection() {
       try {
         debugLog('Creating peer connection...');
@@ -843,15 +838,18 @@
           debugLog('Remote video stream set');
         };
         
-        // Handle ICE candidates
+        // Handle ICE candidates - FIXED: Proper candidate validation and storage
         peerConnection.onicecandidate = (event) => {
           if (event.candidate) {
             debugLog('New ICE candidate: ' + event.candidate.candidate);
-            const candidate = event.candidate.toJSON();
-            db.ref(`calls/${currentCallId}/candidates/${currentUserId}`).push({
-              candidate: candidate,
-              from: currentUserId
-            });
+            // Store the complete candidate object
+            const candidateData = {
+              candidate: event.candidate.candidate,
+              sdpMid: event.candidate.sdpMid,
+              sdpMLineIndex: event.candidate.sdpMLineIndex,
+              usernameFragment: event.candidate.usernameFragment
+            };
+            db.ref(`calls/${currentCallId}/candidates/${currentUserId}`).push(candidateData);
           } else {
             debugLog('All ICE candidates have been generated');
           }
@@ -924,13 +922,26 @@
           }
         });
         
-        // Listen for ICE candidates
+        // Listen for ICE candidates - FIXED: Proper candidate retrieval
         db.ref(`calls/${currentCallId}/candidates`).on('child_added', async (snapshot) => {
           const candidateData = snapshot.val();
           if (candidateData.from !== currentUserId && peerConnection.remoteDescription) {
             try {
-              debugLog('Processing ICE candidate from peer');
-              const candidate = new RTCIceCandidate(candidateData.candidate);
+              debugLog('Processing ICE candidate from peer: ' + candidateData.candidate);
+              
+              // Validate candidate data exists
+              if (!candidateData.candidate) {
+                debugLog('No candidate data found');
+                return;
+              }
+              
+              const candidate = new RTCIceCandidate({
+                candidate: candidateData.candidate,
+                sdpMid: candidateData.sdpMid || null,
+                sdpMLineIndex: candidateData.sdpMLineIndex || null,
+                usernameFragment: candidateData.usernameFragment || null
+              });
+              
               await peerConnection.addIceCandidate(candidate);
               debugLog('Added ICE candidate from peer');
             } catch (error) {
@@ -996,13 +1007,26 @@
         });
         debugLog('Answer sent to Firebase');
         
-        // Listen for ICE candidates
+        // Listen for ICE candidates - FIXED: Proper candidate retrieval
         db.ref(`calls/${currentCallId}/candidates`).on('child_added', async (snapshot) => {
           const candidateData = snapshot.val();
           if (candidateData.from !== currentUserId && peerConnection.remoteDescription) {
             try {
-              debugLog('Processing ICE candidate from peer');
-              const candidate = new RTCIceCandidate(candidateData.candidate);
+              debugLog('Processing ICE candidate from peer: ' + candidateData.candidate);
+              
+              // Validate candidate data exists
+              if (!candidateData.candidate) {
+                debugLog('No candidate data found');
+                return;
+              }
+              
+              const candidate = new RTCIceCandidate({
+                candidate: candidateData.candidate,
+                sdpMid: candidateData.sdpMid || null,
+                sdpMLineIndex: candidateData.sdpMLineIndex || null,
+                usernameFragment: candidateData.usernameFragment || null
+              });
+              
               await peerConnection.addIceCandidate(candidate);
               debugLog('Added ICE candidate from peer');
             } catch (error) {
