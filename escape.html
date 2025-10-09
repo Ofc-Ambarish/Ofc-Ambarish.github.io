@@ -28,6 +28,7 @@
       box-shadow: 0 20px 40px rgba(0,0,0,0.1);
       overflow: hidden;
       border: 1px solid rgba(255,255,255,0.2);
+      height: 90vh;
     }
     body.dark-mode .main-container {
       background: rgba(30, 30, 30, 0.95);
@@ -52,34 +53,98 @@
     #chatDiv {
       display: flex;
       flex-direction: column;
-      height: 80vh;
-      padding: 1rem;
+      height: 100%;
+      padding: 0;
+    }
+
+    /* Chat Header */
+    .chat-header {
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .back-button {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      transition: background 0.3s ease;
+    }
+    .back-button:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    .user-avatar {
+      width: 45px;
+      height: 45px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+    .user-info {
+      flex: 1;
+    }
+    .user-name {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 2px;
+    }
+    .user-status {
+      font-size: 0.85rem;
+      opacity: 0.9;
+    }
+    .header-call-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .header-call-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1.1rem;
+    }
+    .header-call-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: scale(1.1);
     }
 
     /* User List */
     #userList {
-      max-height: 200px;
+      flex: 1;
       overflow-y: auto;
-      border: 1px solid #e9ecef;
-      border-radius: 10px;
       background: #f8f9fa;
     }
     body.dark-mode #userList {
       background: #2d3748;
-      border-color: #4a5568;
     }
     .user-item {
-      padding: 12px 15px;
+      padding: 15px;
       border-bottom: 1px solid #e9ecef;
       cursor: pointer;
       transition: all 0.3s ease;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      gap: 15px;
     }
     .user-item:hover {
       background: #e3f2fd;
-      transform: translateX(5px);
     }
     body.dark-mode .user-item {
       border-color: #4a5568;
@@ -87,58 +152,40 @@
     body.dark-mode .user-item:hover {
       background: #2d3748;
     }
-    .user-item:last-child {
-      border-bottom: none;
-    }
-    .user-info {
+    .user-item-avatar {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      border-radius: 50%;
       display: flex;
       align-items: center;
-      gap: 10px;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
     }
-    .user-email {
+    .user-item-info {
+      flex: 1;
+    }
+    .user-item-name {
       font-weight: 500;
+      margin-bottom: 2px;
     }
-    .user-status {
+    .user-item-status {
       font-size: 0.8rem;
       opacity: 0.7;
-    }
-    .call-buttons {
-      display: flex;
-      gap: 5px;
-    }
-    .call-btn-small {
-      background: transparent;
-      border: none;
-      padding: 8px;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 1.1rem;
-    }
-    .video-call-btn {
-      color: #007bff;
-    }
-    .audio-call-btn {
-      color: #28a745;
-    }
-    .call-btn-small:hover {
-      background: rgba(0,0,0,0.1);
-      transform: scale(1.1);
     }
 
     /* Chat Box */
     #chatBox {
       flex: 1;
       background: #f8f9fa;
-      border-radius: 15px;
       padding: 1rem;
       overflow-y: auto;
-      margin: 1rem 0;
-      border: 1px solid #e9ecef;
+      display: flex;
+      flex-direction: column;
     }
     body.dark-mode #chatBox {
       background: #2d3748;
-      border-color: #4a5568;
     }
 
     /* Messages */
@@ -179,10 +226,6 @@
       margin-top: 5px;
       text-align: right;
     }
-    .message-reactions {
-      margin-top: 5px;
-      font-size: 1.1rem;
-    }
     .read-status {
       font-size: 0.7rem;
       opacity: 0.6;
@@ -219,6 +262,54 @@
       background: #4a5568;
     }
 
+    /* Input Area */
+    .input-area {
+      padding: 1rem;
+      background: white;
+      border-top: 1px solid #e9ecef;
+    }
+    body.dark-mode .input-area {
+      background: #2d3748;
+      border-color: #4a5568;
+    }
+    .input-group {
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .form-control {
+      border: none;
+      padding: 15px 20px;
+      font-size: 1rem;
+    }
+    .form-control:focus {
+      box-shadow: none;
+    }
+    .btn-send {
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      border: none;
+      padding: 0 25px;
+      color: white;
+      font-weight: 600;
+    }
+
+    /* Typing Indicator */
+    #typingIndicator {
+      font-style: italic;
+      color: #6c757d;
+      padding: 10px;
+      font-size: 0.9rem;
+      background: #f8f9fa;
+      border-radius: 10px;
+      margin: 5px 0;
+      align-self: flex-start;
+      max-width: fit-content;
+    }
+    body.dark-mode #typingIndicator {
+      background: #4a5568;
+      color: #e0e0e0;
+    }
+
     /* Call UI */
     #callContainer {
       position: fixed;
@@ -251,6 +342,7 @@
       height: 100%;
       object-fit: cover;
       background: #000;
+      transition: all 0.3s ease;
     }
     #localVideo {
       position: absolute;
@@ -265,6 +357,7 @@
       cursor: pointer;
       transition: all 0.3s ease;
       box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+      z-index: 2;
     }
     #localVideo:hover {
       transform: scale(1.05);
@@ -275,7 +368,7 @@
       position: absolute;
       top: 0;
       left: 0;
-      z-index: 2;
+      z-index: 3;
     }
     #remoteVideo.main-video {
       width: 200px;
@@ -283,7 +376,7 @@
       position: absolute;
       bottom: 20px;
       right: 20px;
-      z-index: 1;
+      z-index: 2;
     }
 
     /* Call Controls */
@@ -366,36 +459,6 @@
       to { top: 20px; opacity: 1; }
     }
 
-    /* Typing Indicator */
-    #typingIndicator {
-      font-style: italic;
-      color: #6c757d;
-      padding: 10px;
-      font-size: 0.9rem;
-    }
-
-    /* Input Group */
-    .input-group {
-      border-radius: 25px;
-      overflow: hidden;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    .form-control {
-      border: none;
-      padding: 15px 20px;
-      font-size: 1rem;
-    }
-    .form-control:focus {
-      box-shadow: none;
-    }
-    .btn-send {
-      background: linear-gradient(135deg, #007bff, #0056b3);
-      border: none;
-      padding: 0 25px;
-      color: white;
-      font-weight: 600;
-    }
-
     /* Theme Toggle */
     #toggleTheme {
       background: transparent;
@@ -413,6 +476,7 @@
       .main-container {
         margin: 10px;
         border-radius: 15px;
+        height: 95vh;
       }
       #localVideo {
         width: 120px;
@@ -425,6 +489,9 @@
       }
       #videoContainer {
         height: 60%;
+      }
+      .chat-header {
+        padding: 1rem;
       }
     }
   </style>
@@ -450,34 +517,53 @@
     </div>
 
     <div id="chatDiv" style="display:none;">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0"><i class="fas fa-comments me-2"></i>Chat</h4>
-        <button id="toggleTheme" class="btn btn-sm btn-outline-secondary">🌙</button>
+      <!-- Chat Header (Visible when chat is active) -->
+      <div id="chatHeader" class="chat-header" style="display:none;">
+        <button class="back-button" onclick="showUserList()">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        <div class="user-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="user-info">
+          <div class="user-name" id="headerUserName">User Name</div>
+          <div class="user-status" id="headerUserStatus">Online</div>
+        </div>
+        <div class="header-call-buttons">
+          <button class="header-call-btn" onclick="startVideoCall()" title="Video Call">
+            <i class="fas fa-video"></i>
+          </button>
+          <button class="header-call-btn" onclick="startAudioCall()" title="Audio Call">
+            <i class="fas fa-phone"></i>
+          </button>
+        </div>
       </div>
-      
-      <div id="userStatus" class="alert alert-info py-2 mb-3"></div>
-      
-      <div id="userList" class="mb-3"></div>
-      
-      <div id="typingIndicator" class="small" style="display:none;">
-        <i class="fas fa-ellipsis-h me-2"></i>User is typing...
+
+      <!-- User List (Default view) -->
+      <div id="userListContainer" style="height: 100%; display: flex; flex-direction: column;">
+        <div class="chat-header">
+          <div class="user-info">
+            <div class="user-name">Select a user to chat</div>
+            <div class="user-status">Online users</div>
+          </div>
+          <button id="toggleTheme" class="header-call-btn">🌙</button>
+        </div>
+        <div id="userList"></div>
       </div>
-      
-      <div id="chatBox"></div>
-      
-      <div class="input-group">
-        <input id="messageInput" class="form-control" placeholder="Type your message..." />
-        <button onclick="sendMessage()" class="btn btn-send">Send</button>
+
+      <!-- Chat Area (Visible when user is selected) -->
+      <div id="chatArea" style="display:none; height: 100%; flex-direction: column;">
+        <div id="typingIndicator" class="small" style="display:none;">
+          <i class="fas fa-ellipsis-h me-2"></i>User is typing...
+        </div>
+        <div id="chatBox"></div>
+        <div class="input-area">
+          <div class="input-group">
+            <input id="messageInput" class="form-control" placeholder="Type your message..." />
+            <button onclick="sendMessage()" class="btn btn-send">Send</button>
+          </div>
+        </div>
       </div>
-      
-      <div class="form-check mt-3">
-        <input class="form-check-input" type="checkbox" id="notificationsToggle">
-        <label class="form-check-label" for="notificationsToggle">Enable Notifications</label>
-      </div>
-      
-      <button onclick="logout()" class="btn btn-link mt-2 text-decoration-none">
-        <i class="fas fa-sign-out-alt me-2"></i>Logout
-      </button>
     </div>
   </div>
 
@@ -489,7 +575,7 @@
     </div>
     
     <div id="videoContainer">
-      <video id="remoteVideo" autoplay playsinline></video>
+      <video id="remoteVideo" autoplay playsinline class="main-video"></video>
       <video id="localVideo" autoplay playsinline muted></video>
     </div>
     
@@ -537,6 +623,7 @@
     let currentUserId = null;
     let chatId = null;
     let selectedUserId = null;
+    let selectedUserEmail = null;
     let callInProgress = false;
     let currentCallId = null;
     let localStream = null;
@@ -586,6 +673,44 @@
       }, 3000);
     }
 
+    function getInitials(email) {
+      return email.charAt(0).toUpperCase();
+    }
+
+    // UI Navigation
+    function showUserList() {
+      document.getElementById('chatHeader').style.display = 'none';
+      document.getElementById('userListContainer').style.display = 'flex';
+      document.getElementById('chatArea').style.display = 'none';
+      selectedUserId = null;
+      selectedUserEmail = null;
+    }
+
+    function showChatArea(userId, userEmail, userStatus) {
+      selectedUserId = userId;
+      selectedUserEmail = userEmail;
+      
+      document.getElementById('headerUserName').textContent = userEmail;
+      document.getElementById('headerUserStatus').textContent = userStatus;
+      document.getElementById('userListContainer').style.display = 'none';
+      document.getElementById('chatHeader').style.display = 'flex';
+      document.getElementById('chatArea').style.display = 'flex';
+      
+      startChatWith(userId);
+    }
+
+    function startVideoCall() {
+      if (selectedUserId) {
+        initiateCall(selectedUserId, false);
+      }
+    }
+
+    function startAudioCall() {
+      if (selectedUserId) {
+        initiateCall(selectedUserId, true);
+      }
+    }
+
     // UI Controls
     document.addEventListener("keydown", (e) => {
       if (e.ctrlKey && e.key === "Enter") {
@@ -599,32 +724,30 @@
       document.querySelector(".main-container").style.display = "block";
     });
 
-    // Video toggle functionality
-    document.getElementById('localVideo').addEventListener('click', function() {
-      const localVideo = document.getElementById('localVideo');
-      const remoteVideo = document.getElementById('remoteVideo');
-      
-      if (localVideo.classList.contains('main-video')) {
-        localVideo.classList.remove('main-video');
-        remoteVideo.classList.add('main-video');
-      } else {
-        localVideo.classList.add('main-video');
-        remoteVideo.classList.remove('main-video');
-      }
-    });
+    // Video toggle functionality - Fixed
+    let isLocalVideoMain = false;
 
-    document.getElementById('remoteVideo').addEventListener('click', function() {
+    function toggleVideoView() {
       const localVideo = document.getElementById('localVideo');
       const remoteVideo = document.getElementById('remoteVideo');
       
-      if (remoteVideo.classList.contains('main-video')) {
-        remoteVideo.classList.remove('main-video');
+      isLocalVideoMain = !isLocalVideoMain;
+      
+      if (isLocalVideoMain) {
         localVideo.classList.add('main-video');
+        remoteVideo.classList.remove('main-video');
+        localVideo.style.zIndex = '3';
+        remoteVideo.style.zIndex = '2';
       } else {
-        remoteVideo.classList.add('main-video');
         localVideo.classList.remove('main-video');
+        remoteVideo.classList.add('main-video');
+        localVideo.style.zIndex = '2';
+        remoteVideo.style.zIndex = '3';
       }
-    });
+    }
+
+    document.getElementById('localVideo').addEventListener('click', toggleVideoView);
+    document.getElementById('remoteVideo').addEventListener('click', toggleVideoView);
 
     // Auth functions
     function login() {
@@ -670,52 +793,38 @@
 
           const div = document.createElement("div");
           div.className = "user-item";
-          div.onclick = () => startChatWith(uid);
+          div.onclick = () => {
+            const status = userData.online ? 
+              '<i class="fas fa-circle text-success me-1"></i>Online' : 
+              `Last seen ${userData.lastOnline ? formatDateTime(userData.lastOnline) : 'a long time ago'}`;
+            showChatArea(uid, userData.email, status);
+          };
 
-          const userInfo = document.createElement("div");
-          userInfo.className = "user-info";
+          const avatar = document.createElement("div");
+          avatar.className = "user-item-avatar";
+          avatar.textContent = getInitials(userData.email);
+
+          const info = document.createElement("div");
+          info.className = "user-item-info";
           
-          const emailSpan = document.createElement("span");
-          emailSpan.className = "user-email";
-          emailSpan.textContent = userData.email;
+          const name = document.createElement("div");
+          name.className = "user-item-name";
+          name.textContent = userData.email;
 
-          const statusSpan = document.createElement("span");
-          statusSpan.className = "user-status";
+          const status = document.createElement("div");
+          status.className = "user-item-status";
           if (userData.online) {
-            statusSpan.innerHTML = '<i class="fas fa-circle text-success me-1"></i>Online';
+            status.innerHTML = '<i class="fas fa-circle text-success me-1"></i>Online';
           } else if (userData.lastOnline) {
-            statusSpan.textContent = `Last seen ${formatDateTime(userData.lastOnline)}`;
+            status.textContent = `Last seen ${formatDateTime(userData.lastOnline)}`;
           } else {
-            statusSpan.textContent = "Offline";
+            status.textContent = "Offline";
           }
 
-          const callButtons = document.createElement("div");
-          callButtons.className = "call-buttons";
-          
-          const videoCallBtn = document.createElement("button");
-          videoCallBtn.className = "call-btn-small video-call-btn";
-          videoCallBtn.innerHTML = '<i class="fas fa-video"></i>';
-          videoCallBtn.title = "Start video call";
-          videoCallBtn.onclick = (e) => {
-            e.stopPropagation();
-            initiateCall(uid, false);
-          };
-
-          const audioCallBtn = document.createElement("button");
-          audioCallBtn.className = "call-btn-small audio-call-btn";
-          audioCallBtn.innerHTML = '<i class="fas fa-phone"></i>';
-          audioCallBtn.title = "Start audio call";
-          audioCallBtn.onclick = (e) => {
-            e.stopPropagation();
-            initiateCall(uid, true);
-          };
-
-          callButtons.appendChild(videoCallBtn);
-          callButtons.appendChild(audioCallBtn);
-          userInfo.appendChild(emailSpan);
-          userInfo.appendChild(statusSpan);
-          div.appendChild(userInfo);
-          div.appendChild(callButtons);
+          info.appendChild(name);
+          info.appendChild(status);
+          div.appendChild(avatar);
+          div.appendChild(info);
           userList.appendChild(div);
         });
 
@@ -727,24 +836,22 @@
 
     // Chat functions
     function startChatWith(otherUserId) {
-      selectedUserId = otherUserId;
       chatId = currentUserId < otherUserId
         ? `${currentUserId}_${otherUserId}`
         : `${otherUserId}_${currentUserId}`;
 
       document.getElementById("chatBox").innerHTML = "";
-      document.getElementById("userStatus").textContent = "";
 
       // Status updates
       db.ref(`users/${otherUserId}`).on("value", (snapshot) => {
         const data = snapshot.val();
+        let statusText = "Offline";
         if (data.online) {
-          document.getElementById("userStatus").innerHTML = '<i class="fas fa-circle text-success me-2"></i>Online';
+          statusText = '<i class="fas fa-circle text-success me-1"></i>Online';
         } else if (data.lastOnline) {
-          document.getElementById("userStatus").textContent = `Last seen ${formatDateTime(data.lastOnline)}`;
-        } else {
-          document.getElementById("userStatus").textContent = "Offline";
+          statusText = `Last seen ${formatDateTime(data.lastOnline)}`;
         }
+        document.getElementById("headerUserStatus").innerHTML = statusText;
       });
 
       // Typing indicator
@@ -775,7 +882,6 @@
 
         const div = document.createElement("div");
         div.className = msg.senderId === currentUserId ? "message sent" : "message received";
-        div.ondblclick = () => showReactionPicker(msgId);
 
         const textDiv = document.createElement("div");
         textDiv.innerHTML = msg.text;
@@ -803,15 +909,6 @@
 
         // Mark as read
         db.ref(`chats/${chatId}/messages/${msgId}/readBy/${currentUserId}`).set(true);
-
-        // Notifications
-        if (document.getElementById("notificationsToggle").checked && msg.senderId !== currentUserId) {
-          if (Notification.permission === "granted") {
-            new Notification("New message", { body: msg.text });
-          } else if (Notification.permission !== "denied") {
-            Notification.requestPermission();
-          }
-        }
       });
     }
 
@@ -1193,12 +1290,13 @@
       document.getElementById("callContainer").classList.remove("active");
       document.getElementById("localVideo").style.display = 'block';
       document.getElementById("remoteVideo").style.display = 'block';
-      document.getElementById("localVideo").classList.remove('main-video');
-      document.getElementById("remoteVideo").classList.add('main-video');
       document.getElementById("muteAudio").innerHTML = '<i class="fas fa-microphone"></i>';
       document.getElementById("muteVideo").innerHTML = '<i class="fas fa-video"></i>';
       isAudioMuted = false;
       isVideoMuted = false;
+      isLocalVideoMain = false;
+      document.getElementById('localVideo').classList.remove('main-video');
+      document.getElementById('remoteVideo').classList.add('main-video');
     }
 
     // Event listeners for call controls
