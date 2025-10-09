@@ -32,7 +32,7 @@
     /* Main Container */
     .main-container {
       background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px); 
       border-radius: 20px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.1);
       overflow: hidden;
@@ -340,6 +340,34 @@
       border-radius: 6px;
     }
     body.dark-mode .reply-quote { color: #e5e7eb; background: rgba(255,255,255,0.03); }
+
+    /* Make horizontal gestures possible on mobile while preserving vertical scroll */
+    .message {
+      touch-action: pan-y;
+      -webkit-user-select: none;
+      user-select: none;
+      position: relative; /* for reply button */
+    }
+
+    /* Reply button inside message */
+    .message .reply-btn {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.06);
+      color: rgba(0,0,0,0.6);
+      cursor: pointer;
+      font-size: 14px;
+      z-index: 5;
+    }
+    body.dark-mode .message .reply-btn { background: rgba(255,255,255,0.03); color: #e5e7eb; }
 
     /* Typing Indicator */
     #typingIndicator {
@@ -847,52 +875,93 @@
 
     // Attach swipe-to-reply handlers to a message element
     function attachSwipeToReply(el, messageId, senderId, text, senderEmail) {
-      let startX = 0;
-      let moved = false;
-      const threshold = 80; // px to trigger reply
+  let startX = 0;
+  let startY = 0;
+  let tracking = false;
+  const threshold = 80; // px to trigger reply
+  let prevented = false;
+  let longPressTimer = null;
+  const longPressDelay = 600; // ms
 
-      function onPointerDown(e) {
-        startX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX) || 0;
-        moved = false;
-        el.setPointerCapture && el.setPointerCapture(e.pointerId);
+      function onStart(clientX, clientY) {
+        startX = clientX;
+        startY = clientY;
+        tracking = true;
+        prevented = false;
+        el.style.transition = '';
+        // start long-press timer
+        clearTimeout(longPressTimer);
+        longPressTimer = setTimeout(() => {
+          setReply(messageId, senderId, text, senderEmail);
+        }, longPressDelay);
       }
 
-      function onPointerMove(e) {
-        const x = e.clientX || 0;
-        const dx = x - startX;
-        if (dx > 10) {
-          moved = true;
-          el.style.transform = `translateX(${Math.min(dx, 120)}px)`;
-          el.style.transition = 'transform 0s';
+      function onMove(clientX, clientY, ev) {
+        if (!tracking) return;
+        const dx = clientX - startX;
+        const dy = clientY - startY;
+        // cancel long-press if user moves significantly
+        if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+          clearTimeout(longPressTimer);
+        }
+        // If horizontal movement dominates, prevent vertical scroll
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 6) {
+          if (!prevented) {
+            // prevent default scrolling
+            if (ev && ev.cancelable) ev.preventDefault();
+            prevented = true;
+          }
+          // show translate for feedback (clamp)
+          el.style.transform = `translateX(${Math.max(Math.min(dx, 140), -140)}px)`;
         }
       }
 
-      function onPointerUp(e) {
+      function onEnd(clientX) {
+        if (!tracking) return;
+        tracking = false;
+        clearTimeout(longPressTimer);
         el.style.transition = 'transform 0.15s ease';
-        const x = e.clientX || 0;
-        const dx = x - startX;
-        if (dx > threshold) {
-          // Trigger reply
+        const dx = clientX - startX;
+        if (Math.abs(dx) > threshold) {
+          // Trigger reply (support swipe right OR left)
           setReply(messageId, senderId, text, senderEmail);
         }
-        // reset transform
         el.style.transform = '';
-        moved = false;
       }
 
-      // Use pointer events if available, otherwise fallback to touch/mouse
+      // Pointer events (preferred)
       if (window.PointerEvent) {
-        el.addEventListener('pointerdown', onPointerDown);
-        el.addEventListener('pointermove', onPointerMove);
-        el.addEventListener('pointerup', onPointerUp);
-        el.addEventListener('pointercancel', onPointerUp);
+        el.addEventListener('pointerdown', (e) => {
+          if (e.pointerType === 'mouse' && e.button !== 0) return; // only left mouse
+          onStart(e.clientX, e.clientY);
+          el.setPointerCapture && el.setPointerCapture(e.pointerId);
+        });
+        el.addEventListener('pointermove', (e) => onMove(e.clientX, e.clientY, e));
+        el.addEventListener('pointerup', (e) => onEnd(e.clientX));
+        el.addEventListener('pointercancel', (e) => onEnd(e.clientX));
       } else {
-        el.addEventListener('touchstart', (e) => onPointerDown(e.touches[0]));
-        el.addEventListener('touchmove', (e) => onPointerMove(e.touches[0]));
-        el.addEventListener('touchend', (e) => onPointerUp(e.changedTouches[0]));
-        el.addEventListener('mousedown', onPointerDown);
-        el.addEventListener('mousemove', onPointerMove);
-        el.addEventListener('mouseup', onPointerUp);
+        // Touch fallback: non-passive listener to allow preventDefault
+        el.addEventListener('touchstart', function ts(e) {
+          const t = e.touches[0];
+          onStart(t.clientX, t.clientY);
+        }, { passive: true });
+
+        el.addEventListener('touchmove', function tm(e) {
+          const t = e.touches[0];
+          // If horizontal movement detected we need a non-passive listener to prevent scrolling.
+          // Try to prevent default here when horizontal drag is dominant.
+          onMove(t.clientX, t.clientY, e);
+        }, { passive: false });
+
+        el.addEventListener('touchend', function te(e) {
+          const t = e.changedTouches[0];
+          onEnd(t.clientX);
+        });
+
+        // Mouse fallback for desktop
+        el.addEventListener('mousedown', function md(e) { if (e.button === 0) onStart(e.clientX, e.clientY); });
+        el.addEventListener('mousemove', function mm(e) { onMove(e.clientX, e.clientY); });
+        el.addEventListener('mouseup', function mu(e) { onEnd(e.clientX); });
       }
     }
 
@@ -1083,6 +1152,17 @@
         div.appendChild(textDiv);
         div.appendChild(timeDiv);
         chatBox.appendChild(div);
+
+        // Add inline reply button for direct tap reply (good for mobile)
+        const replyBtn = document.createElement('button');
+        replyBtn.className = 'reply-btn';
+        replyBtn.title = 'Reply';
+        replyBtn.innerHTML = '↩';
+        replyBtn.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          setReply(msgId, msg.senderId, msg.text, msg.senderEmail || null);
+        });
+        div.appendChild(replyBtn);
 
         // Attach swipe-to-reply handlers
         attachSwipeToReply(div, msgId, msg.senderId, msg.text, msg.senderEmail || null);
