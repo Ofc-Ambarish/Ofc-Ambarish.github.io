@@ -197,6 +197,12 @@
       word-wrap: break-word;
       position: relative;
       animation: messageAppear 0.3s ease-out;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      user-select: none;
+    }
+    .message:active {
+      transform: scale(0.98);
     }
     @keyframes messageAppear {
       from { opacity: 0; transform: translateY(10px); }
@@ -230,6 +236,46 @@
       font-size: 0.7rem;
       opacity: 0.6;
       margin-top: 2px;
+    }
+
+    /* Reply Preview */
+    .reply-preview {
+      background: rgba(0, 0, 0, 0.1);
+      border-left: 3px solid #007bff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+      opacity: 0.8;
+    }
+    body.dark-mode .reply-preview {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .reply-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      background: rgba(0, 123, 255, 0.1);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border-left: 3px solid #007bff;
+    }
+    .reply-indicator-text {
+      flex: 1;
+      font-size: 0.9rem;
+      color: #007bff;
+    }
+    .cancel-reply {
+      background: none;
+      border: none;
+      color: #6c757d;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 50%;
+    }
+    .cancel-reply:hover {
+      background: rgba(0, 0, 0, 0.1);
     }
 
     /* Date Divider */
@@ -267,6 +313,7 @@
       padding: 1rem;
       background: white;
       border-top: 1px solid #e9ecef;
+      position: relative;
     }
     body.dark-mode .input-area {
       background: #2d3748;
@@ -291,6 +338,10 @@
       padding: 0 25px;
       color: white;
       font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .btn-send:hover {
+      transform: scale(1.05);
     }
 
     /* Typing Indicator */
@@ -471,6 +522,26 @@
       transform: rotate(30deg);
     }
 
+    /* Swipe to Reply Indicator */
+    .swipe-indicator {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 123, 255, 0.9);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 0.9rem;
+      z-index: 999;
+      animation: swipePulse 2s infinite;
+      display: none;
+    }
+    @keyframes swipePulse {
+      0%, 100% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .main-container {
@@ -492,6 +563,9 @@
       }
       .chat-header {
         padding: 1rem;
+      }
+      .message {
+        max-width: 85%;
       }
     }
   </style>
@@ -557,14 +631,33 @@
           <i class="fas fa-ellipsis-h me-2"></i>User is typing...
         </div>
         <div id="chatBox"></div>
+        
+        <!-- Reply Indicator -->
+        <div id="replyIndicator" class="reply-indicator" style="display: none;">
+          <div class="reply-indicator-text">
+            <strong>Replying to:</strong> <span id="replyPreviewText"></span>
+          </div>
+          <button class="cancel-reply" onclick="cancelReply()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        
+        <!-- Input Area -->
         <div class="input-area">
           <div class="input-group">
             <input id="messageInput" class="form-control" placeholder="Type your message..." />
-            <button onclick="sendMessage()" class="btn btn-send">Send</button>
+            <button onclick="sendMessage()" class="btn btn-send">
+              <i class="fas fa-paper-plane"></i>
+            </button>
           </div>
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Swipe Indicator -->
+  <div class="swipe-indicator" id="swipeIndicator">
+    <i class="fas fa-reply me-2"></i>Swipe left on message to reply
   </div>
 
   <!-- Call UI -->
@@ -633,6 +726,9 @@
     let isAudioCall = false;
     let isAudioMuted = false;
     let isVideoMuted = false;
+    let replyingToMessage = null;
+    let touchStartX = 0;
+    let touchStartY = 0;
 
     // WebRTC configuration
     const configuration = {
@@ -677,6 +773,48 @@
       return email.charAt(0).toUpperCase();
     }
 
+    // Reply functionality
+    function setReplyToMessage(messageId, messageText) {
+      replyingToMessage = messageId;
+      document.getElementById('replyIndicator').style.display = 'flex';
+      document.getElementById('replyPreviewText').textContent = messageText;
+      document.getElementById('messageInput').focus();
+    }
+
+    function cancelReply() {
+      replyingToMessage = null;
+      document.getElementById('replyIndicator').style.display = 'none';
+    }
+
+    // Swipe functionality for mobile
+    function handleTouchStart(e) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }
+
+    function handleTouchEnd(e, messageId, messageText) {
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      
+      const diffX = touchStartX - touchEndX;
+      const diffY = Math.abs(touchStartY - touchEndY);
+      
+      // Only trigger if horizontal swipe and minimal vertical movement
+      if (diffX > 50 && diffY < 50) {
+        setReplyToMessage(messageId, messageText);
+      }
+    }
+
+    // Show swipe indicator on mobile
+    function showSwipeIndicator() {
+      if (window.innerWidth <= 768) {
+        document.getElementById('swipeIndicator').style.display = 'block';
+        setTimeout(() => {
+          document.getElementById('swipeIndicator').style.display = 'none';
+        }, 3000);
+      }
+    }
+
     // UI Navigation
     function showUserList() {
       document.getElementById('chatHeader').style.display = 'none';
@@ -684,6 +822,7 @@
       document.getElementById('chatArea').style.display = 'none';
       selectedUserId = null;
       selectedUserEmail = null;
+      cancelReply();
     }
 
     function showChatArea(userId, userEmail, userStatus) {
@@ -695,6 +834,9 @@
       document.getElementById('userListContainer').style.display = 'none';
       document.getElementById('chatHeader').style.display = 'flex';
       document.getElementById('chatArea').style.display = 'flex';
+      
+      // Show swipe indicator on mobile when first opening chat
+      showSwipeIndicator();
       
       startChatWith(userId);
     }
@@ -841,6 +983,7 @@
         : `${otherUserId}_${currentUserId}`;
 
       document.getElementById("chatBox").innerHTML = "";
+      cancelReply();
 
       // Status updates
       db.ref(`users/${otherUserId}`).on("value", (snapshot) => {
@@ -882,6 +1025,19 @@
 
         const div = document.createElement("div");
         div.className = msg.senderId === currentUserId ? "message sent" : "message received";
+        
+        // Add click event for reply (desktop) and touch events for mobile
+        div.onclick = () => setReplyToMessage(msgId, msg.text);
+        div.ontouchstart = handleTouchStart;
+        div.ontouchend = (e) => handleTouchEnd(e, msgId, msg.text);
+
+        // Add reply preview if this is a reply
+        if (msg.replyTo) {
+          const replyPreview = document.createElement("div");
+          replyPreview.className = "reply-preview";
+          replyPreview.textContent = msg.replyToText || "Original message";
+          div.appendChild(replyPreview);
+        }
 
         const textDiv = document.createElement("div");
         textDiv.innerHTML = msg.text;
@@ -920,15 +1076,35 @@
       const text = document.getElementById("messageInput").value.trim();
       if (!text) return;
 
-      const newMsgRef = db.ref(`chats/${chatId}/messages`).push();
-      newMsgRef.set({
+      const messageData = {
         text: text,
         senderId: currentUserId,
         timestamp: Date.now(),
         readBy: { [currentUserId]: true }
-      });
+      };
+
+      // Add reply data if replying to a message
+      if (replyingToMessage) {
+        messageData.replyTo = replyingToMessage;
+        // Store the replied message text for display
+        db.ref(`chats/${chatId}/messages/${replyingToMessage}`).once('value').then((snapshot) => {
+          const repliedMsg = snapshot.val();
+          if (repliedMsg) {
+            messageData.replyToText = repliedMsg.text;
+          }
+          sendMessageToFirebase(messageData);
+        });
+      } else {
+        sendMessageToFirebase(messageData);
+      }
+    }
+
+    function sendMessageToFirebase(messageData) {
+      const newMsgRef = db.ref(`chats/${chatId}/messages`).push();
+      newMsgRef.set(messageData);
 
       document.getElementById("messageInput").value = "";
+      cancelReply();
     }
 
     // Typing indicator
