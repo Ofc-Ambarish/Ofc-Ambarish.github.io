@@ -473,7 +473,7 @@
           <button type="button" class="btn-secondary-glow" id="saveDraftBtn">
             <i class="fas fa-save"></i> Save Draft
           </button>
-          <button type="submit" class="btn-glow" id="publishBtn">
+          <button type="button" class="btn-glow" id="publishBtn">
             <i class="fas fa-paper-plane"></i> Publish Post
           </button>
         </div>
@@ -614,10 +614,24 @@
       });
 
       // Form submission for publishing
-      document.getElementById('publishBtn').addEventListener('submit', function(e) {
+      // Keep submit handler for programmatic submits, but most browsers block submit
+      // when a textarea replaced by TinyMCE is 'required'. Use the Publish button
+      // click handler below so we can trigger TinyMCE save and run our validation.
+      document.getElementById('blogForm').addEventListener('submit', function(e) {
         e.preventDefault();
         saveBlogPost('published');
       });
+
+      // Publish button click: ensure TinyMCE content is synced and then save as published
+      const publishBtn = document.getElementById('publishBtn');
+      if (publishBtn) {
+        publishBtn.addEventListener('click', function() {
+          if (window.tinymce && typeof tinymce.triggerSave === 'function') {
+            tinymce.triggerSave();
+          }
+          saveBlogPost('published');
+        });
+      }
 
       // Set default publish date to today
       document.getElementById('publishDate').value = new Date().toISOString().split('T')[0];
