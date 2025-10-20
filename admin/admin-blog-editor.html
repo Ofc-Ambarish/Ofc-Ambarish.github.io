@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog Editor | Admin Panel</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- TinyMCE Rich Text Editor -->
+  <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+  
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --primary: #00f5ff;
+      --secondary: #7b00ff;
+      --dark: #0a0a1a;
+      --darker: #050510;
+      --light: #e2f1f8;
+      --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Exo 2', sans-serif;
+      background: var(--darker);
+      color: var(--light);
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(123, 0, 255, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(0, 245, 255, 0.1) 0%, transparent 20%);
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: rgba(10, 10, 26, 0.95);
+      backdrop-filter: blur(10px);
+      border-right: 1px solid rgba(0, 245, 255, 0.2);
+      min-height: 100vh;
+      position: fixed;
+      width: 250px;
+    }
+
+    .sidebar-brand {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(0, 245, 255, 0.2);
+    }
+
+    .sidebar-brand h2 {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 1.5rem;
+      margin: 0;
+    }
+
+    .nav-link {
+      color: var(--light) !important;
+      padding: 0.8rem 1.5rem;
+      border-left: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      background: rgba(0, 245, 255, 0.1);
+      border-left-color: var(--primary);
+      color: var(--primary) !important;
+    }
+
+    .nav-link i {
+      width: 20px;
+      margin-right: 10px;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 250px;
+      padding: 20px;
+    }
+
+    .navbar-top {
+      background: rgba(10, 10, 26, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0, 245, 255, 0.2);
+      padding: 1rem 2rem;
+      margin: -20px -20px 2rem -20px;
+    }
+
+    /* Form Styles */
+    .editor-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 245, 255, 0.2);
+      border-radius: 15px;
+      padding: 2rem;
+      backdrop-filter: blur(10px);
+      margin-bottom: 2rem;
+    }
+
+    .form-control, .form-select {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(0, 245, 255, 0.3);
+      color: var(--light);
+      border-radius: 10px;
+      padding: 0.8rem 1rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--primary);
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
+      color: var(--light);
+    }
+
+    .form-label {
+      color: var(--light);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .help-text {
+      color: var(--primary);
+      opacity: 0.8;
+      font-size: 0.9rem;
+      margin-top: -0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    /* Image Preview */
+    .image-preview {
+      width: 100%;
+      height: 200px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px dashed rgba(0, 245, 255, 0.3);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .image-preview:hover {
+      border-color: var(--primary);
+    }
+
+    .image-preview img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover;
+    }
+
+    .image-preview-placeholder {
+      text-align: center;
+      color: var(--primary);
+      opacity: 0.7;
+    }
+
+    .image-preview-placeholder i {
+      font-size: 3rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Tags Input */
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .tag {
+      background: rgba(0, 245, 255, 0.2);
+      color: var(--primary);
+      padding: 0.3rem 0.8rem;
+      border-radius: 15px;
+      font-size: 0.9rem;
+      border: 1px solid rgba(0, 245, 255, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tag-remove {
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.3s ease;
+    }
+
+    .tag-remove:hover {
+      opacity: 1;
+    }
+
+    /* TinyMCE Customization */
+    .tox-tinymce {
+      border: 1px solid rgba(0, 245, 255, 0.3) !important;
+      border-radius: 10px !important;
+      background: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .tox-editor-header {
+      background: rgba(10, 10, 26, 0.9) !important;
+      border-bottom: 1px solid rgba(0, 245, 255, 0.2) !important;
+    }
+
+    .tox-toolbar, .tox-toolbar__primary {
+      background: transparent !important;
+    }
+
+    /* Buttons */
+    .btn-glow {
+      background: var(--gradient);
+      border: none;
+      color: white;
+      padding: 0.8rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+    }
+
+    .btn-glow:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(0, 245, 255, 0.5);
+      color: white;
+    }
+
+    .btn-outline-glow {
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      background: transparent;
+      padding: 0.8rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-outline-glow:hover {
+      background: var(--primary);
+      color: var(--dark);
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+    }
+
+    .btn-secondary-glow {
+      border: 2px solid #6c757d;
+      color: #6c757d;
+      background: transparent;
+      padding: 0.8rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-secondary-glow:hover {
+      background: #6c757d;
+      color: white;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(0, 245, 255, 0.2);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <h2><i class="fas fa-code"></i> AMBARISH</h2>
+      <small class="text-muted">Admin Panel</small>
+    </div>
+    
+    <nav class="nav flex-column">
+      <a class="nav-link" href="admin-dashboard.html">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+      </a>
+      <a class="nav-link" href="admin-blogs.html">
+        <i class="fas fa-blog"></i> Blog Posts
+      </a>
+      <a class="nav-link active" href="admin-blog-editor.html">
+        <i class="fas fa-edit"></i> Editor
+      </a>
+      <a class="nav-link" href="admin-messages.html">
+        <i class="fas fa-envelope"></i> Messages
+      </a>
+      <a class="nav-link" href="../index.html" target="_blank">
+        <i class="fas fa-external-link-alt"></i> View Website
+      </a>
+      <a class="nav-link" href="#" id="logoutBtn">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </a>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Top Navbar -->
+    <nav class="navbar-top">
+      <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center w-100">
+          <h3 class="mb-0" id="pageTitle">New Blog Post</h3>
+          <div>
+            <a href="admin-blogs.html" class="btn-outline-glow me-2">
+              <i class="fas fa-arrow-left"></i> Back to Posts
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Blog Editor Form -->
+    <div class="container-fluid">
+      <form id="blogForm">
+        <div class="row">
+          <div class="col-lg-8">
+            <!-- Basic Information -->
+            <div class="editor-card">
+              <h4 class="mb-4"><i class="fas fa-info-circle me-2"></i>Basic Information</h4>
+              
+              <div class="mb-3">
+                <label class="form-label">Blog Title *</label>
+                <input type="text" class="form-control" id="blogTitle" required 
+                       placeholder="Enter an engaging title for your blog post">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Summary *</label>
+                <textarea class="form-control" id="blogSummary" rows="3" required
+                          placeholder="Write a brief summary that will appear in blog listings"></textarea>
+                <div class="help-text">Keep it under 200 characters for best display</div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Content *</label>
+                <textarea class="form-control" id="blogContent" rows="15" required
+                          placeholder="Write your amazing content here..."></textarea>
+                <div class="help-text">Use the rich text editor above for formatting</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <!-- Settings & Metadata -->
+            <div class="editor-card">
+              <h4 class="mb-4"><i class="fas fa-cog me-2"></i>Settings & Metadata</h4>
+
+              <div class="mb-3">
+                <label class="form-label">Featured Image URL</label>
+                <input type="url" class="form-control" id="featuredImage"
+                       placeholder="images/blog/your-image.jpg">
+                <div class="help-text">
+                  Upload image to GitHub in <code>images/blog/</code> folder first
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Image Preview</label>
+                <div class="image-preview" id="imagePreview">
+                  <div class="image-preview-placeholder">
+                    <i class="fas fa-image"></i>
+                    <div>Image preview will appear here</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Status</label>
+                <select class="form-select" id="blogStatus">
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Publish Date</label>
+                <input type="date" class="form-control" id="publishDate">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Read Time</label>
+                <input type="text" class="form-control" id="readTime" 
+                       placeholder="5 min read" value="5 min read">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Tags</label>
+                <input type="text" class="form-control" id="tagInput" 
+                       placeholder="Add tags (press Enter after each tag)">
+                <div class="help-text">Press Enter or comma to add tags</div>
+                <div class="tags-container mt-2" id="tagsContainer"></div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">SEO Title</label>
+                <input type="text" class="form-control" id="seoTitle" 
+                       placeholder="Optional: Custom SEO title">
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">SEO Description</label>
+                <textarea class="form-control" id="seoDescription" rows="3"
+                          placeholder="Optional: Custom SEO description"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button type="button" class="btn-secondary-glow" id="saveDraftBtn">
+            <i class="fas fa-save"></i> Save Draft
+          </button>
+          <button type="submit" class="btn-glow" id="publishBtn">
+            <i class="fas fa-paper-plane"></i> Publish Post
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTUuYYFA5Jfa5aoGrN_OA3gaslvUE-2TM",
+      authDomain: "portfolio-6367d.firebasestorage.app",
+      projectId: "portfolio-6367d",
+      storageBucket: "portfolio-6367d.firebasestorage.app",
+      messagingSenderId: "171885145177",
+      appId: "1:171885145177:web:009bd1eca84520c7af1548",
+      measurementId: "G-Y9R9S2H954"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    let currentBlogId = null;
+    let tags = [];
+
+    // Check authentication and load blog data if editing
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = 'admin-login.html';
+      } else {
+        initializeEditor();
+      }
+    });
+
+    // Logout handler
+    document.getElementById('logoutBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      auth.signOut().then(() => {
+        window.location.href = 'admin-login.html';
+      });
+    });
+
+    function initializeEditor() {
+      // Get blog ID from URL if editing
+      const urlParams = new URLSearchParams(window.location.search);
+      currentBlogId = urlParams.get('id');
+
+      if (currentBlogId) {
+        document.getElementById('pageTitle').textContent = 'Edit Blog Post';
+        loadBlogData(currentBlogId);
+      }
+
+      // Initialize TinyMCE
+      tinymce.init({
+        selector: '#blogContent',
+        plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table code help wordcount',
+        toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image | code',
+        skin: 'oxide-dark',
+        content_css: 'dark',
+        height: 400,
+        promotion: false,
+        branding: false
+      });
+
+      // Initialize event listeners
+      initializeEventListeners();
+    }
+
+    function initializeEventListeners() {
+      // Image URL preview
+      document.getElementById('featuredImage').addEventListener('input', updateImagePreview);
+
+      // Tag input handling
+      document.getElementById('tagInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ',') {
+          e.preventDefault();
+          addTag(this.value.trim());
+          this.value = '';
+        }
+      });
+
+      // Save draft button
+      document.getElementById('saveDraftBtn').addEventListener('click', function() {
+        saveBlogPost('draft');
+      });
+
+      // Form submission for publishing
+      document.getElementById('blogForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveBlogPost('published');
+      });
+
+      // Set default publish date to today
+      document.getElementById('publishDate').value = new Date().toISOString().split('T')[0];
+    }
+
+    function updateImagePreview() {
+      const url = document.getElementById('featuredImage').value;
+      const preview = document.getElementById('imagePreview');
+      
+      if (url) {
+        preview.innerHTML = `<img src="${url}" alt="Preview" onerror="this.style.display='none'">`;
+        
+        // Check if image loads successfully
+        const img = new Image();
+        img.onload = function() {
+          // Image loaded successfully
+        };
+        img.onerror = function() {
+          preview.innerHTML = `
+            <div class="image-preview-placeholder">
+              <i class="fas fa-exclamation-triangle"></i>
+              <div>Image not found</div>
+              <small>Check the URL</small>
+            </div>
+          `;
+        };
+        img.src = url;
+      } else {
+        preview.innerHTML = `
+          <div class="image-preview-placeholder">
+            <i class="fas fa-image"></i>
+            <div>No image selected</div>
+          </div>
+        `;
+      }
+    }
+
+    function addTag(tagText) {
+      if (tagText && !tags.includes(tagText)) {
+        tags.push(tagText);
+        renderTags();
+      }
+    }
+
+    function removeTag(tagText) {
+      tags = tags.filter(tag => tag !== tagText);
+      renderTags();
+    }
+
+    function renderTags() {
+      const container = document.getElementById('tagsContainer');
+      container.innerHTML = tags.map(tag => `
+        <div class="tag">
+          ${tag}
+          <span class="tag-remove" onclick="removeTag('${tag}')">
+            <i class="fas fa-times"></i>
+          </span>
+        </div>
+      `).join('');
+    }
+
+    async function loadBlogData(blogId) {
+      try {
+        const doc = await db.collection('blogs').doc(blogId).get();
+        if (doc.exists) {
+          const blog = doc.data();
+          
+          // Populate form fields
+          document.getElementById('blogTitle').value = blog.title || '';
+          document.getElementById('blogSummary').value = blog.summary || '';
+          document.getElementById('featuredImage').value = blog.image || '';
+          document.getElementById('blogStatus').value = blog.status || 'draft';
+          document.getElementById('publishDate').value = blog.date || new Date().toISOString().split('T')[0];
+          document.getElementById('readTime').value = blog.readTime || '5 min read';
+          document.getElementById('seoTitle').value = blog.seoTitle || '';
+          document.getElementById('seoDescription').value = blog.seoDescription || '';
+          
+          // Set tags
+          tags = blog.tags || [];
+          renderTags();
+          
+          // Update TinyMCE content
+          tinymce.get('blogContent').setContent(blog.content || '');
+          
+          // Update image preview
+          updateImagePreview();
+        }
+      } catch (error) {
+        console.error('Error loading blog data:', error);
+        showAlert('Error loading blog post', 'danger');
+      }
+    }
+
+    async function saveBlogPost(status) {
+      const title = document.getElementById('blogTitle').value.trim();
+      const summary = document.getElementById('blogSummary').value.trim();
+      const content = tinymce.get('blogContent').getContent();
+      
+      if (!title || !summary || !content) {
+        showAlert('Please fill in all required fields', 'danger');
+        return;
+      }
+
+      const blogData = {
+        title: title,
+        summary: summary,
+        content: content,
+        image: document.getElementById('featuredImage').value.trim(),
+        status: status,
+        date: document.getElementById('publishDate').value || new Date().toISOString().split('T')[0],
+        readTime: document.getElementById('readTime').value.trim() || '5 min read',
+        tags: tags,
+        seoTitle: document.getElementById('seoTitle').value.trim(),
+        seoDescription: document.getElementById('seoDescription').value.trim(),
+        author: {
+          name: "Ambarish",
+          image: "../images/authors/ambarish.jpg"
+        },
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
+
+      // Add createdAt for new posts
+      if (!currentBlogId) {
+        blogData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+      }
+
+      try {
+        let result;
+        if (currentBlogId) {
+          // Update existing post
+          result = await db.collection('blogs').doc(currentBlogId).update(blogData);
+        } else {
+          // Create new post
+          result = await db.collection('blogs').add(blogData);
+          currentBlogId = result.id;
+        }
+
+        showAlert(`Blog post ${status === 'published' ? 'published' : 'saved as draft'} successfully!`, 'success');
+        
+        // Redirect to blogs list after short delay
+        setTimeout(() => {
+          window.location.href = 'admin-blogs.html';
+        }, 1500);
+
+      } catch (error) {
+        console.error('Error saving blog post:', error);
+        showAlert('Error saving blog post. Please try again.', 'danger');
+      }
+    }
+
+    function showAlert(message, type) {
+      // Remove any existing alerts
+      const existingAlert = document.querySelector('.alert');
+      if (existingAlert) {
+        existingAlert.remove();
+      }
+
+      // Create alert element
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type} position-fixed top-0 end-0 m-3`;
+      alert.style.zIndex = '9999';
+      alert.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+        ${message}
+      `;
+      
+      document.body.appendChild(alert);
+      
+      // Remove after 3 seconds
+      setTimeout(() => {
+        alert.remove();
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
