@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | Admin Panel</title>
+  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --primary: #00f5ff;
+      --secondary: #7b00ff;
+      --dark: #0a0a1a;
+      --darker: #050510;
+      --light: #e2f1f8;
+      --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Exo 2', sans-serif;
+      background: var(--darker);
+      color: var(--light);
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(123, 0, 255, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(0, 245, 255, 0.1) 0%, transparent 20%);
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: rgba(10, 10, 26, 0.95);
+      backdrop-filter: blur(10px);
+      border-right: 1px solid rgba(0, 245, 255, 0.2);
+      min-height: 100vh;
+      position: fixed;
+      width: 250px;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-brand {
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(0, 245, 255, 0.2);
+    }
+
+    .sidebar-brand h2 {
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 1.5rem;
+      margin: 0;
+    }
+
+    .nav-link {
+      color: var(--light) !important;
+      padding: 0.8rem 1.5rem;
+      border-left: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      background: rgba(0, 245, 255, 0.1);
+      border-left-color: var(--primary);
+      color: var(--primary) !important;
+    }
+
+    .nav-link i {
+      width: 20px;
+      margin-right: 10px;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 250px;
+      padding: 20px;
+    }
+
+    .navbar-top {
+      background: rgba(10, 10, 26, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0, 245, 255, 0.2);
+      padding: 1rem 2rem;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 245, 255, 0.2);
+      border-radius: 15px;
+      padding: 1.5rem;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--primary);
+      box-shadow: 0 10px 30px rgba(0, 245, 255, 0.2);
+    }
+
+    .stat-icon {
+      font-size: 2.5rem;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: var(--light);
+      opacity: 0.8;
+      font-size: 0.9rem;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+
+    .action-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 245, 255, 0.2);
+      border-radius: 10px;
+      padding: 1.5rem;
+      text-align: center;
+      text-decoration: none;
+      color: var(--light);
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .action-btn:hover {
+      background: rgba(0, 245, 255, 0.1);
+      border-color: var(--primary);
+      transform: translateY(-3px);
+      color: var(--primary);
+    }
+
+    .action-btn i {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    /* Recent Activity */
+    .activity-list {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 245, 255, 0.2);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      padding: 1.5rem;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      padding: 1rem 0;
+      border-bottom: 1px solid rgba(0, 245, 255, 0.1);
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(0, 245, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+      color: var(--primary);
+    }
+
+    .btn-glow {
+      background: var(--gradient);
+      border: none;
+      color: white;
+      padding: 0.6rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+    }
+
+    .btn-glow:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(0, 245, 255, 0.5);
+      color: white;
+    }
+
+    .btn-outline-glow {
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      background: transparent;
+      padding: 0.6rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-outline-glow:hover {
+      background: var(--primary);
+      color: var(--dark);
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <h2><i class="fas fa-code"></i> AMBARISH</h2>
+      <small class="text-muted">Admin Panel</small>
+    </div>
+    
+    <nav class="nav flex-column">
+      <a class="nav-link active" href="admin-dashboard.html">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+      </a>
+      <a class="nav-link" href="admin-blogs.html">
+        <i class="fas fa-blog"></i> Blog Posts
+      </a>
+      <a class="nav-link" href="admin-messages.html">
+        <i class="fas fa-envelope"></i> Messages
+      </a>
+      <a class="nav-link" href="../index.html" target="_blank">
+        <i class="fas fa-external-link-alt"></i> View Website
+      </a>
+      <a class="nav-link" href="#" id="logoutBtn">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </a>
+    </nav>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Top Navbar -->
+    <nav class="navbar-top">
+      <div class="container-fluid">
+        <h3 class="mb-0">Dashboard</h3>
+        <div class="user-info">
+          <div class="user-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <div>
+            <div id="userEmail" class="text-primary">admin@ambarish.com</div>
+            <small class="text-muted">Administrator</small>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-blog"></i>
+        </div>
+        <div class="stat-number" id="totalPosts">0</div>
+        <div class="stat-label">Total Blog Posts</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-eye"></i>
+        </div>
+        <div class="stat-number" id="totalViews">0</div>
+        <div class="stat-label">Total Views</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-envelope"></i>
+        </div>
+        <div class="stat-number" id="totalMessages">0</div>
+        <div class="stat-label">Messages</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-file-alt"></i>
+        </div>
+        <div class="stat-number" id="draftPosts">0</div>
+        <div class="stat-label">Draft Posts</div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <h4 class="mt-4 mb-3">Quick Actions</h4>
+    <div class="quick-actions">
+      <a href="admin-blog-editor.html" class="action-btn">
+        <i class="fas fa-plus-circle"></i>
+        New Blog Post
+      </a>
+      <a href="admin-blogs.html" class="action-btn">
+        <i class="fas fa-edit"></i>
+        Manage Posts
+      </a>
+      <a href="admin-messages.html" class="action-btn">
+        <i class="fas fa-envelope"></i>
+        View Messages
+      </a>
+      <a href="../blog.html" target="_blank" class="action-btn">
+        <i class="fas fa-external-link-alt"></i>
+        Preview Blog
+      </a>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row mt-4">
+      <div class="col-lg-8">
+        <h4 class="mb-3">Recent Activity</h4>
+        <div class="activity-list">
+          <div id="recentActivity">
+            <div class="activity-item">
+              <div class="activity-icon">
+                <i class="fas fa-spinner fa-spin"></i>
+              </div>
+              <div>
+                <div>Loading recent activity...</div>
+                <small class="text-muted">Please wait</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-lg-4">
+        <h4 class="mb-3">Popular Posts</h4>
+        <div class="activity-list">
+          <div id="popularPosts">
+            <div class="activity-item">
+              <div class="activity-icon">
+                <i class="fas fa-spinner fa-spin"></i>
+              </div>
+              <div>
+                <div>Loading popular posts...</div>
+                <small class="text-muted">Please wait</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTUuYYFA5Jfa5aoGrN_OA3gaslvUE-2TM",
+      authDomain: "portfolio-6367d.firebaseapp.com",
+      projectId: "portfolio-6367d",
+      storageBucket: "portfolio-6367d.firebasestorage.app",
+      messagingSenderId: "171885145177",
+      appId: "1:171885145177:web:009bd1eca84520c7af1548",
+      measurementId: "G-Y9R9S2H954"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Check authentication
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = 'admin-login.html';
+      } else {
+        document.getElementById('userEmail').textContent = user.email;
+        loadDashboardData();
+      }
+    });
+
+    // Logout handler
+    document.getElementById('logoutBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      auth.signOut().then(() => {
+        window.location.href = 'admin-login.html';
+      });
+    });
+
+    // Load dashboard data
+    async function loadDashboardData() {
+      try {
+        // Load blog posts count
+        const blogsSnapshot = await db.collection('blogs').get();
+        const totalPosts = blogsSnapshot.size;
+        document.getElementById('totalPosts').textContent = totalPosts;
+
+        // Load draft posts count
+        const draftSnapshot = await db.collection('blogs').where('status', '==', 'draft').get();
+        document.getElementById('draftPosts').textContent = draftSnapshot.size;
+
+        // Load total views
+        let totalViews = 0;
+        const viewsPromises = [];
+        blogsSnapshot.forEach(doc => {
+          const promise = db.collection('blogViews').doc(doc.id).get()
+            .then(viewDoc => {
+              if (viewDoc.exists) {
+                totalViews += viewDoc.data().views || 0;
+              }
+            });
+          viewsPromises.push(promise);
+        });
+        await Promise.all(viewsPromises);
+        document.getElementById('totalViews').textContent = totalViews;
+
+        // Load messages count
+        const messagesSnapshot = await db.collection('contactMessages').get();
+        document.getElementById('totalMessages').textContent = messagesSnapshot.size;
+
+        // Load recent activity
+        loadRecentActivity(blogsSnapshot);
+        
+        // Load popular posts
+        loadPopularPosts(blogsSnapshot);
+
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+      }
+    }
+
+    async function loadRecentActivity(blogsSnapshot) {
+      const recentActivity = document.getElementById('recentActivity');
+      const activities = [];
+
+      // Get recent blog posts
+      blogsSnapshot.forEach(doc => {
+        const blog = doc.data();
+        activities.push({
+          type: 'blog',
+          title: blog.title,
+          date: blog.createdAt?.toDate() || new Date(),
+          status: blog.status
+        });
+      });
+
+      // Get recent messages
+      const messagesSnapshot = await db.collection('contactMessages')
+        .orderBy('timestamp', 'desc')
+        .limit(5)
+        .get();
+
+      messagesSnapshot.forEach(doc => {
+        const message = doc.data();
+        activities.push({
+          type: 'message',
+          title: `New message from ${message.name}`,
+          date: message.timestamp?.toDate() || new Date()
+        });
+      });
+
+      // Sort by date and take latest 5
+      activities.sort((a, b) => b.date - a.date);
+      const recentItems = activities.slice(0, 5);
+
+      if (recentItems.length === 0) {
+        recentActivity.innerHTML = '<div class="text-center py-3 text-muted">No recent activity</div>';
+        return;
+      }
+
+      recentActivity.innerHTML = recentItems.map(item => `
+        <div class="activity-item">
+          <div class="activity-icon">
+            <i class="fas fa-${item.type === 'blog' ? 'blog' : 'envelope'}"></i>
+          </div>
+          <div>
+            <div>${item.title}</div>
+            <small class="text-muted">
+              ${item.type === 'blog' ? (item.status === 'draft' ? 'Draft' : 'Published') : 'Message'} • 
+              ${formatDate(item.date)}
+            </small>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function loadPopularPosts(blogsSnapshot) {
+      const popularPosts = document.getElementById('popularPosts');
+      const postsWithViews = [];
+
+      // Get view counts for each post
+      for (const doc of blogsSnapshot.docs) {
+        const blog = doc.data();
+        const viewDoc = await db.collection('blogViews').doc(doc.id).get();
+        const views = viewDoc.exists ? viewDoc.data().views : 0;
+        
+        postsWithViews.push({
+          title: blog.title,
+          views: views,
+          date: blog.createdAt?.toDate() || new Date()
+        });
+      }
+
+      // Sort by views and take top 3
+      postsWithViews.sort((a, b) => b.views - a.views);
+      const topPosts = postsWithViews.slice(0, 3);
+
+      if (topPosts.length === 0) {
+        popularPosts.innerHTML = '<div class="text-center py-3 text-muted">No posts yet</div>';
+        return;
+      }
+
+      popularPosts.innerHTML = topPosts.map(post => `
+        <div class="activity-item">
+          <div class="activity-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div>
+            <div class="small">${post.title}</div>
+            <small class="text-muted">
+              ${post.views} views • ${formatDate(post.date)}
+            </small>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function formatDate(date) {
+      return new Date(date).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
+  </script>
+</body>
+</html>
