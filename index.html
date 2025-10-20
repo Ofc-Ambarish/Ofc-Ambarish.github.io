@@ -1,1 +1,1158 @@
-q
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Basic -->
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <!-- Mobile Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- SEO Metas -->
+  <meta name="keywords" content="Senior Manufacturing Engineer, Web Developer, Android Developer, Portfolio" />
+  <meta name="description" content="Ambarish - Senior Manufacturing Engineer & Digital Developer bridging physical and digital innovation" />
+  <meta name="author" content="Ambarish" />
+
+  <title>Ambarish | Engineer & Developer</title>
+
+  <!-- Bootstrap core css -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <!-- Custom styles -->
+  <style>
+    :root {
+      --primary: #00f5ff;
+      --secondary: #7b00ff;
+      --dark: #0a0a1a;
+      --darker: #050510;
+      --light: #e2f1f8;
+      --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Exo 2', sans-serif;
+      background: var(--darker);
+      color: var(--light);
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(123, 0, 255, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(0, 245, 255, 0.1) 0%, transparent 20%);
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+    }
+
+    /* Navbar Styles */
+    .navbar {
+      background: rgba(10, 10, 26, 0.95) !important;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0, 245, 255, 0.2);
+      padding: 1rem 0;
+      transition: all 0.3s ease;
+    }
+
+    .navbar-brand {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 1.8rem;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-link {
+      color: var(--light) !important;
+      font-weight: 500;
+      margin: 0 0.5rem;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .nav-link:hover {
+      color: var(--primary) !important;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--gradient);
+      transition: width 0.3s ease;
+    }
+
+    .nav-link:hover::after {
+      width: 100%;
+    }
+
+    .admin-badge {
+      background: var(--gradient);
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      margin-left: 0.5rem;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Hero Section */
+    .hero-section {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+      position: relative;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-badge {
+      background: rgba(0, 245, 255, 0.1);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      padding: 0.5rem 1.5rem;
+      border-radius: 25px;
+      font-size: 0.9rem;
+      display: inline-block;
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-title {
+      font-size: 4rem;
+      font-weight: 900;
+      margin-bottom: 1.5rem;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.1;
+    }
+
+    .hero-subtitle {
+      font-size: 1.5rem;
+      color: var(--light);
+      margin-bottom: 2rem;
+      opacity: 0.9;
+    }
+
+    .hero-description {
+      font-size: 1.1rem;
+      margin-bottom: 3rem;
+      opacity: 0.8;
+      max-width: 600px;
+    }
+
+    .btn-glow {
+      background: var(--gradient);
+      border: none;
+      color: white;
+      padding: 0.8rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+      margin-right: 1rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-glow:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(0, 245, 255, 0.5);
+      color: white;
+    }
+
+    .btn-outline-glow {
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      background: transparent;
+      padding: 0.8rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-block;
+      transition: all 0.3s ease;
+    }
+
+    .btn-outline-glow:hover {
+      background: var(--primary);
+      color: var(--dark);
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+    }
+
+    /* Animated Background Elements */
+    .floating-shapes {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .shape {
+      position: absolute;
+      opacity: 0.1;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .shape-1 {
+      width: 100px;
+      height: 100px;
+      background: var(--primary);
+      top: 20%;
+      left: 10%;
+      border-radius: 50%;
+      animation-delay: 0s;
+    }
+
+    .shape-2 {
+      width: 150px;
+      height: 150px;
+      background: var(--secondary);
+      top: 60%;
+      right: 10%;
+      border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+      animation-delay: 2s;
+    }
+
+    .shape-3 {
+      width: 80px;
+      height: 80px;
+      background: var(--primary);
+      bottom: 20%;
+      left: 20%;
+      border-radius: 50%;
+      animation-delay: 4s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    /* Section Styles */
+    .section-title {
+      font-size: 3rem;
+      text-align: center;
+      margin-bottom: 3rem;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      font-size: 1.2rem;
+      opacity: 0.8;
+      margin-bottom: 4rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* About Section */
+    .about-section {
+      padding: 100px 0;
+      background: var(--dark);
+    }
+
+    .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .tech-item {
+      background: rgba(0, 245, 255, 0.1);
+      border: 1px solid rgba(0, 245, 255, 0.3);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+
+    .tech-item:hover {
+      background: rgba(0, 245, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    /* Skills Section */
+    .skills-section {
+      padding: 100px 0;
+      background: var(--darker);
+    }
+
+    .skill-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 245, 255, 0.2);
+      border-radius: 15px;
+      padding: 2rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      height: 100%;
+    }
+
+    .skill-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--primary);
+      box-shadow: 0 10px 30px rgba(0, 245, 255, 0.2);
+    }
+
+    .skill-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Projects Section */
+    .projects-section {
+      padding: 100px 0;
+      background: var(--dark);
+    }
+
+    .project-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 245, 255, 0.2);
+      border-radius: 15px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      height: 100%;
+    }
+
+    .project-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--primary);
+      box-shadow: 0 15px 40px rgba(0, 245, 255, 0.3);
+    }
+
+    .project-image {
+      height: 200px;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: white;
+    }
+
+    .project-content {
+      padding: 1.5rem;
+    }
+
+    .project-tech {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .project-tech span {
+      background: rgba(0, 245, 255, 0.1);
+      padding: 0.3rem 0.8rem;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      border: 1px solid rgba(0, 245, 255, 0.3);
+    }
+
+    /* Blog Preview Section */
+    .blog-section {
+      padding: 100px 0;
+      background: var(--darker);
+    }
+
+    .blog-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 245, 255, 0.2);
+      border-radius: 15px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      height: 100%;
+      position: relative;
+    }
+
+    .blog-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .blog-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--primary);
+      box-shadow: 0 15px 40px rgba(0, 245, 255, 0.3);
+    }
+
+    .blog-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .blog-image-container {
+      width: 100%;
+      height: 200px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 15px 15px 0 0;
+    }
+
+    .blog-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.3s ease;
+    }
+
+    .blog-image.loading {
+      opacity: 0;
+    }
+
+    .blog-image.loaded {
+      opacity: 1;
+    }
+
+    .blog-image.error {
+      display: none;
+    }
+
+    .blog-image-placeholder {
+      width: 100%;
+      height: 100%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 3rem;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .blog-content {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      height: calc(100% - 200px);
+    }
+
+    .blog-content h5 {
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--light);
+    }
+
+    .blog-meta {
+      font-size: 0.9rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .blog-tag {
+      background: rgba(0, 245, 255, 0.2);
+      color: var(--primary);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      border: 1px solid rgba(0, 245, 255, 0.3);
+    }
+
+    .view-all-blog {
+      text-align: center;
+      margin-top: 3rem;
+    }
+
+    /* Contact Section */
+    .contact-section {
+      padding: 100px 0;
+      background: var(--dark);
+    }
+
+    .contact-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 245, 255, 0.2);
+      border-radius: 15px;
+      padding: 2rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .form-control {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(0, 245, 255, 0.3);
+      color: var(--light);
+      border-radius: 10px;
+      padding: 0.8rem 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-control:focus {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--primary);
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
+      color: var(--light);
+    }
+
+    /* Footer */
+    .footer {
+      background: var(--darker);
+      border-top: 1px solid rgba(0, 245, 255, 0.2);
+      padding: 3rem 0 1rem;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin: 2rem 0;
+    }
+
+    .social-link {
+      width: 50px;
+      height: 50px;
+      border: 2px solid var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .social-link:hover {
+      background: var(--primary);
+      color: var(--dark);
+      transform: translateY(-3px);
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .spinner-border {
+      color: var(--primary);
+    }
+
+    /* Admin Quick Access */
+    .admin-quick-access {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.5rem;
+      }
+      
+      .section-title {
+        font-size: 2rem;
+      }
+      
+      .admin-quick-access {
+        bottom: 10px;
+        right: 10px;
+      }
+      
+      .admin-badge {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Admin Quick Access -->
+  <div class="admin-quick-access">
+    <a href="admin/admin-login.html" class="btn-glow" title="Admin Panel">
+      <i class="fas fa-cog"></i>
+    </a>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <i class="fas fa-code"></i>
+        AMBARISH
+        <span class="admin-badge">Admin</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="#home">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#about">About</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#skills">Skills</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#projects">Projects</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#blog">Blog</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#contact">Contact</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="admin/admin-login.html">
+              <i class="fas fa-user-shield"></i> Admin
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="home" class="hero-section">
+    <div class="floating-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+      <div class="shape shape-3"></div>
+    </div>
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-6">
+          <div class="hero-content">
+            <div class="hero-badge">
+              <i class="fas fa-rocket"></i> Senior Manufacturing Engineer & Developer
+            </div>
+            <h1 class="hero-title">
+              BRIDGING PHYSICAL & DIGITAL INNOVATION
+            </h1>
+            <p class="hero-subtitle">
+              Transforming manufacturing processes through code and engineering excellence
+            </p>
+            <p class="hero-description">
+              I engineer solutions that span from factory floors to digital platforms, combining precision manufacturing with cutting-edge development.
+            </p>
+            <div class="hero-buttons">
+              <a href="#projects" class="btn-glow">
+                <i class="fas fa-briefcase"></i> View My Work
+              </a>
+              <a href="blog.html" class="btn-outline-glow">
+                <i class="fas fa-blog"></i> Read My Blog
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="text-center">
+            <div style="font-size: 15rem; color: var(--primary); opacity: 0.1;">
+              <i class="fas fa-cogs"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="about-section">
+    <div class="container">
+      <h2 class="section-title">About Me</h2>
+      <p class="section-subtitle">Engineering excellence meets digital innovation</p>
+      
+      <div class="row align-items-center">
+        <div class="col-lg-6">
+          <div class="about-content">
+            <h3 style="color: var(--primary); margin-bottom: 1.5rem;">The Engineer-Developer Fusion</h3>
+            <p class="mb-4">
+              With a foundation in Electrical Engineering and hands-on experience as a Senior Manufacturing Engineer, 
+              I bring a unique perspective to digital development. My engineering background ensures systematic problem-solving, 
+              while my development skills enable innovative digital solutions.
+            </p>
+            <p class="mb-4">
+              Currently working in Bangalore's manufacturing sector, I bridge the gap between industrial processes and 
+              digital transformation, creating tools that enhance efficiency and drive innovation.
+            </p>
+            
+            <div class="tech-stack">
+              <span class="tech-item">Manufacturing Engineering</span>
+              <span class="tech-item">Process Optimization</span>
+              <span class="tech-item">CNC Programming</span>
+              <span class="tech-item">SolidWorks</span>
+              <span class="tech-item">Mastercam</span>
+              <span class="tech-item">Web Development</span>
+              <span class="tech-item">Android Development</span>
+              <span class="tech-item">Industrial Automation</span>
+              <span class="tech-item">Digital Transformation</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="text-center">
+            <div class="skill-card">
+              <div class="skill-icon">
+                <i class="fas fa-industry"></i>
+              </div>
+              <h4>Manufacturing</h4>
+              <p>Senior-level expertise in industrial processes and optimization</p>
+              <div class="project-tech mt-3">
+                <span>CNC Programming</span>
+                <span>SolidWorks</span>
+                <span>Mastercam</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills Section -->
+  <section id="skills" class="skills-section">
+    <div class="container">
+      <h2 class="section-title">My Expertise</h2>
+      <p class="section-subtitle">Blending engineering precision with digital creativity</p>
+      
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="skill-card">
+            <div class="skill-icon">
+              <i class="fas fa-cogs"></i>
+            </div>
+            <h4>Manufacturing Engineering</h4>
+            <p>Process optimization, quality control, industrial automation, and production management</p>
+            <div class="project-tech mt-3">
+              <span>CNC Programming</span>
+              <span>SolidWorks</span>
+              <span>Mastercam</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="skill-card">
+            <div class="skill-icon">
+              <i class="fas fa-cube"></i>
+            </div>
+            <h4>CAD/CAM & Design</h4>
+            <p>3D modeling, technical drawings, manufacturing simulations, and CNC programming</p>
+            <div class="project-tech mt-3">
+              <span>3D Modeling</span>
+              <span>Technical Drawings</span>
+              <span>Simulation</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-4">
+          <div class="skill-card">
+            <div class="skill-icon">
+              <i class="fas fa-code"></i>
+            </div>
+            <h4>Web Development</h4>
+            <p>Full-stack development with modern frameworks and responsive design principles</p>
+            <div class="project-tech mt-3">
+              <span>HTML/CSS</span>
+              <span>JavaScript</span>
+              <span>Bootstrap</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects Section -->
+  <section id="projects" class="projects-section">
+    <div class="container">
+      <h2 class="section-title">Featured Projects</h2>
+      <p class="section-subtitle">Where engineering meets innovation</p>
+      
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-4">
+          <div class="project-card">
+            <div class="project-image">
+              <i class="fas fa-industry"></i>
+            </div>
+            <div class="project-content">
+              <h4>Production Line Optimizer</h4>
+              <p>AI-powered system that reduced manufacturing downtime by 35% through predictive maintenance</p>
+              <div class="project-tech">
+                <span>Python</span>
+                <span>ML</span>
+                <span>IoT</span>
+                <span>CNC</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="project-card">
+            <div class="project-image">
+              <i class="fas fa-mobile-alt"></i>
+            </div>
+            <div class="project-content">
+              <h4>Factory Management App</h4>
+              <p>Android application for real-time production monitoring and quality control</p>
+              <div class="project-tech">
+                <span>Android</span>
+                <span>Java</span>
+                <span>Firebase</span>
+                <span>SolidWorks API</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="project-card">
+            <div class="project-image">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="project-content">
+              <h4>Quality Analytics Dashboard</h4>
+              <p>Web-based dashboard for manufacturing quality metrics and performance analytics</p>
+              <div class="project-tech">
+                <span>React</span>
+                <span>Node.js</span>
+                <span>MongoDB</span>
+                <span>Mastercam</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Blog Preview Section -->
+  <section id="blog" class="blog-section">
+    <div class="container">
+      <h2 class="section-title">Latest from My Blog</h2>
+      <p class="section-subtitle">Insights on engineering, development, and manufacturing innovation</p>
+      
+      <div class="row g-4" id="blog-preview">
+        <div class="col-12 loading-spinner">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-3">Loading latest articles...</p>
+        </div>
+      </div>
+
+      <div class="view-all-blog">
+        <a href="blog.html" class="btn-glow">
+          <i class="fas fa-book-open"></i> View All Blog Posts
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="contact-section">
+    <div class="container">
+      <h2 class="section-title">Get In Touch</h2>
+      <p class="section-subtitle">Let's build something amazing together</p>
+      
+      <div class="row">
+        <div class="col-lg-8 mx-auto">
+          <div class="contact-card">
+            <form id="contactForm">
+              <div class="row">
+                <div class="col-md-6">
+                  <input type="text" class="form-control" placeholder="Your Name" required>
+                </div>
+                <div class="col-md-6">
+                  <input type="email" class="form-control" placeholder="Your Email" required>
+                </div>
+              </div>
+              <input type="text" class="form-control" placeholder="Subject">
+              <textarea class="form-control" rows="5" placeholder="Your Message" required></textarea>
+              <button type="submit" class="btn-glow w-100">
+                <i class="fas fa-paper-plane"></i> Send Message
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="social-links">
+        <a href="https://www.facebook.com/ambarish.ofc" class="social-link" target="_blank">
+          <i class="fab fa-facebook-f"></i>
+        </a>
+        <a href="https://www.twitter.com/iamambarish" class="social-link" target="_blank">
+          <i class="fab fa-twitter"></i>
+        </a>
+        <a href="https://www.linkedin.com" class="social-link" target="_blank">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+        <a href="https://www.instagram.com/_iamambarish" class="social-link" target="_blank">
+          <i class="fab fa-instagram"></i>
+        </a>
+      </div>
+      <p class="text-center mb-0">
+        &copy; 2024 Ambarish. Engineered with <i class="fas fa-heart" style="color: var(--primary);"></i> and Code
+      </p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap & Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTUuYYFA5Jfa5aoGrN_OA3gaslvUE-2TM",
+      authDomain: "portfolio-6367d.firebaseapp.com",
+      projectId: "portfolio-6367d",
+      storageBucket: "portfolio-6367d.firebasestorage.app",
+      messagingSenderId: "171885145177",
+      appId: "1:171885145177:web:009bd1eca84520c7af1548",
+      measurementId: "G-Y9R9S2H954"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Smooth scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+
+    // Navbar background on scroll
+    window.addEventListener('scroll', function() {
+      if (window.scrollY > 100) {
+        document.querySelector('.navbar').style.background = 'rgba(10, 10, 26, 0.98)';
+      } else {
+        document.querySelector('.navbar').style.background = 'rgba(10, 10, 26, 0.95)';
+      }
+    });
+
+    // Advanced image loading with error handling
+    function loadImageWithFallback(imgElement, src, fallbackIcon = 'fa-file-alt') {
+      return new Promise((resolve) => {
+        const tempImg = new Image();
+        
+        tempImg.onload = function() {
+          imgElement.src = src;
+          imgElement.classList.remove('loading');
+          imgElement.classList.add('loaded');
+          resolve(true);
+        };
+        
+        tempImg.onerror = function() {
+          // Hide the broken image and show placeholder
+          imgElement.classList.remove('loading');
+          imgElement.classList.add('error');
+          
+          // Create and show placeholder
+          const placeholder = document.createElement('div');
+          placeholder.className = 'blog-image-placeholder';
+          placeholder.innerHTML = `<i class="fas ${fallbackIcon}"></i>`;
+          
+          imgElement.parentNode.appendChild(placeholder);
+          resolve(false);
+        };
+        
+        // Start loading
+        tempImg.src = src;
+        
+        // Timeout after 5 seconds
+        setTimeout(() => {
+          if (!imgElement.classList.contains('loaded') && !imgElement.classList.contains('error')) {
+            tempImg.onerror();
+          }
+        }, 5000);
+      });
+    }
+
+    // Load blog preview from Firebase
+    function loadBlogPreview() {
+      const blogContainer = document.getElementById('blog-preview');
+      
+      db.collection('blogs')
+        .where('status', '==', 'published')
+        .orderBy('createdAt', 'desc')
+        .limit(3)
+        .get()
+        .then((querySnapshot) => {
+          if (querySnapshot.empty) {
+            blogContainer.innerHTML = `
+              <div class="col-12 text-center">
+                <div class="blog-card">
+                  <div class="blog-content text-center py-5">
+                    <i class="fas fa-pen-nib fa-3x mb-3" style="color: var(--primary); opacity: 0.5;"></i>
+                    <h5>No articles yet</h5>
+                    <p>Check back soon for new content!</p>
+                  </div>
+                </div>
+              </div>
+            `;
+            return;
+          }
+
+          blogContainer.innerHTML = '';
+
+          const loadPromises = [];
+          
+          querySnapshot.forEach((doc) => {
+            const blog = doc.data();
+            blog.id = doc.id;
+            
+            const col = document.createElement('div');
+            col.className = 'col-md-4';
+            
+            col.innerHTML = `
+              <div class="blog-card">
+                <div class="blog-image-container">
+                  <img src="" alt="${blog.title}" 
+                       class="blog-image loading"
+                       data-src="${blog.image}"
+                       data-blog-id="${blog.id}">
+                </div>
+                <div class="blog-content">
+                  <h5>${blog.title}</h5>
+                  <div class="blog-meta">
+                    <span><i class="far fa-calendar"></i> ${blog.date}</span>
+                    <span><i class="far fa-clock"></i> ${blog.readTime || '5 min read'}</span>
+                  </div>
+                  <p class="flex-grow-1">${blog.summary}</p>
+                  ${blog.tags ? `
+                    <div class="mb-3">
+                      ${blog.tags.map(tag => `<span class="blog-tag">${tag}</span>`).join('')}
+                    </div>
+                  ` : ''}
+                  <a href="blog.html#post-${blog.id}" class="btn-glow">
+                    <i class="fas fa-book-open"></i> Read More
+                  </a>
+                </div>
+              </div>
+            `;
+            
+            blogContainer.appendChild(col);
+            
+            // Load image with proper handling
+            const imgElement = col.querySelector('.blog-image');
+            const loadPromise = loadImageWithFallback(imgElement, blog.image, 'fa-newspaper');
+            loadPromises.push(loadPromise);
+          });
+
+          // Optional: Wait for all images to load
+          Promise.all(loadPromises).then(() => {
+            console.log('All blog images processed');
+          });
+        })
+        .catch((error) => {
+          console.error("Error loading blog preview:", error);
+          blogContainer.innerHTML = `
+            <div class="col-12 text-center">
+              <div class="blog-card">
+                <div class="blog-content text-center py-5">
+                  <i class="fas fa-exclamation-triangle fa-3x mb-3" style="color: #ff6b6b;"></i>
+                  <h5>Connection Error</h5>
+                  <p>Unable to load blog posts. Please check your connection.</p>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+    }
+
+    // Contact form handler
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const name = this.querySelector('input[type="text"]').value;
+      const email = this.querySelector('input[type="email"]').value;
+      const subject = this.querySelector('input[type="text"]').value;
+      const message = this.querySelector('textarea').value;
+      
+      if (name && email && message) {
+        db.collection('contactMessages').add({
+          name: name,
+          email: email,
+          subject: subject || 'No Subject',
+          message: message,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          read: false
+        }).then(() => {
+          alert('Message sent successfully! I\'ll get back to you soon.');
+          this.reset();
+        }).catch((error) => {
+          console.error('Error sending message:', error);
+          alert('Message sent! (Note: Message logging is currently disabled)');
+          this.reset();
+        });
+      } else {
+        alert('Please fill in all fields.');
+      }
+    });
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      loadBlogPreview();
+    });
+  </script>
+</body>
+</html>
