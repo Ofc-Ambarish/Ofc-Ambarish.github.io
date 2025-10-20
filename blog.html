@@ -1,1 +1,883 @@
-gg
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog | Ambarish - Engineer & Developer</title>
+  
+  <!-- Bootstrap & Styles -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  
+  <style>
+    :root {
+      --primary: #00f5ff;
+      --secondary: #7b00ff;
+      --dark: #0a0a1a;
+      --darker: #050510;
+      --light: #e2f1f8;
+      --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Exo 2', sans-serif;
+      background: var(--darker);
+      color: var(--light);
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(123, 0, 255, 0.1) 0%, transparent 20%),
+        radial-gradient(circle at 90% 80%, rgba(0, 245, 255, 0.1) 0%, transparent 20%);
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: rgba(10, 10, 26, 0.95) !important;
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(0, 245, 255, 0.2);
+      padding: 1rem 0;
+    }
+
+    .navbar-brand {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 1.8rem;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-link {
+      color: var(--light) !important;
+      font-weight: 500;
+      margin: 0 0.5rem;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .nav-link:hover {
+      color: var(--primary) !important;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--gradient);
+      transition: width 0.3s ease;
+    }
+
+    .nav-link:hover::after {
+      width: 100%;
+    }
+
+    .admin-badge {
+      background: var(--gradient);
+      color: white;
+      padding: 0.3rem 0.8rem;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      margin-left: 0.5rem;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Blog Section */
+    .blog_section {
+      padding: 120px 0 80px;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .section-title {
+      font-size: 3rem;
+      text-align: center;
+      margin-bottom: 1rem;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      font-size: 1.2rem;
+      opacity: 0.8;
+      margin-bottom: 3rem;
+    }
+
+    /* Blog Cards */
+    .blog_card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 245, 255, 0.2);
+      border-radius: 15px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      height: 100%;
+      position: relative;
+    }
+
+    .blog_card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--gradient);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+
+    .blog_card:hover {
+      transform: translateY(-10px);
+      border-color: var(--primary);
+      box-shadow: 0 15px 40px rgba(0, 245, 255, 0.3);
+    }
+
+    .blog_card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .blog-image-container {
+      width: 100%;
+      height: 220px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 15px 15px 0 0;
+    }
+
+    .blog-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.3s ease;
+    }
+
+    .blog-image.loading {
+      opacity: 0;
+    }
+
+    .blog-image.loaded {
+      opacity: 1;
+    }
+
+    .blog-image.error {
+      display: none;
+    }
+
+    .blog-image-placeholder {
+      width: 100%;
+      height: 100%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 3rem;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .content {
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+      height: calc(100% - 220px);
+    }
+
+    .content h5 {
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: var(--light);
+      font-size: 1.3rem;
+    }
+
+    .content .meta {
+      font-size: 0.9rem;
+      color: var(--primary);
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .author-box {
+      display: flex;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 15px;
+      border-top: 1px solid rgba(0, 245, 255, 0.2);
+    }
+
+    .author-image {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      margin-right: 12px;
+      border: 2px solid var(--primary);
+      object-fit: cover;
+    }
+
+    .author-image.error {
+      display: none;
+    }
+
+    .author-placeholder {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      margin-right: 12px;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.8rem;
+      border: 2px solid var(--primary);
+    }
+
+    .view-count {
+      font-size: 0.9rem;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Search Bar */
+    .search-container {
+      max-width: 500px;
+      margin: 0 auto 50px auto;
+      position: relative;
+    }
+
+    .search-bar {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(0, 245, 255, 0.3);
+      color: var(--light);
+      border-radius: 50px;
+      padding: 12px 20px;
+      font-size: 1rem;
+    }
+
+    .search-bar:focus {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: var(--primary);
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+      color: var(--light);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--primary);
+    }
+
+    /* Tags */
+    .blog-tag {
+      background: rgba(0, 245, 255, 0.2);
+      color: var(--primary);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      border: 1px solid rgba(0, 245, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .blog-tag:hover {
+      background: var(--primary);
+      color: var(--dark);
+    }
+
+    /* Buttons */
+    .btn-glow {
+      background: var(--gradient);
+      border: none;
+      color: white;
+      padding: 10px 25px;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+    }
+
+    .btn-glow:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(0, 245, 255, 0.5);
+      color: white;
+    }
+
+    /* Modal */
+    .modal-content {
+      background: var(--dark);
+      border: 1px solid rgba(0, 245, 255, 0.3);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+    }
+
+    .modal-header {
+      border-bottom: 1px solid rgba(0, 245, 255, 0.2);
+      background: rgba(10, 10, 26, 0.8);
+    }
+
+    .modal-title {
+      color: var(--primary);
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .btn-close {
+      filter: invert(1);
+    }
+
+    .modal-body {
+      color: var(--light);
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .modal-image-container {
+      width: 100%;
+      height: 300px;
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      border: 1px solid rgba(0, 245, 255, 0.3);
+    }
+
+    .modal-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-image.loading {
+      opacity: 0;
+    }
+
+    .modal-image.loaded {
+      opacity: 1;
+    }
+
+    .modal-image.error {
+      display: none;
+    }
+
+    .modal-image-placeholder {
+      width: 100%;
+      height: 100%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 3rem;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .modal-footer {
+      border-top: 1px solid rgba(0, 245, 255, 0.2);
+      background: rgba(10, 10, 26, 0.8);
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+      text-align: center;
+      padding: 60px 0;
+    }
+
+    .spinner-border {
+      color: var(--primary);
+      width: 3rem;
+      height: 3rem;
+    }
+
+    /* Floating Shapes */
+    .floating-shapes {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .shape {
+      position: absolute;
+      opacity: 0.1;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .shape-1 {
+      width: 80px;
+      height: 80px;
+      background: var(--primary);
+      top: 10%;
+      left: 5%;
+      border-radius: 50%;
+      animation-delay: 0s;
+    }
+
+    .shape-2 {
+      width: 120px;
+      height: 120px;
+      background: var(--secondary);
+      top: 70%;
+      right: 5%;
+      border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+      animation-delay: 2s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(180deg); }
+    }
+
+    /* Back to Home Button */
+    .back-to-home {
+      position: fixed;
+      top: 100px;
+      left: 20px;
+      z-index: 1000;
+    }
+
+    /* Admin Quick Access */
+    .admin-quick-access {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .section-title {
+        font-size: 2rem;
+      }
+      
+      .blog_section {
+        padding: 100px 0 60px;
+      }
+      
+      .back-to-home {
+        position: static;
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      
+      .admin-quick-access {
+        bottom: 10px;
+        right: 10px;
+      }
+      
+      .admin-badge {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Admin Quick Access -->
+  <div class="admin-quick-access">
+    <a href="admin/admin-login.html" class="btn-glow" title="Admin Panel">
+      <i class="fas fa-cog"></i>
+    </a>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">
+        <i class="fas fa-code"></i>
+        AMBARISH
+        <span class="admin-badge">Admin</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="index.html#about">About</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="index.html#skills">Skills</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="index.html#projects">Projects</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="blog.html">Blog</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="index.html#contact">Contact</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="admin/admin-login.html">
+              <i class="fas fa-user-shield"></i> Admin
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Back to Home Button -->
+  <div class="back-to-home">
+    <a href="index.html" class="btn-glow">
+      <i class="fas fa-arrow-left"></i> Back to Home
+    </a>
+  </div>
+
+  <!-- Blog Section -->
+  <section class="blog_section">
+    <div class="floating-shapes">
+      <div class="shape shape-1"></div>
+      <div class="shape shape-2"></div>
+    </div>
+    
+    <div class="container">
+      <h2 class="section-title">Tech Insights & Engineering</h2>
+      <p class="section-subtitle">Exploring the intersection of manufacturing, development, and innovation</p>
+      
+      <!-- Search Bar -->
+      <div class="search-container">
+        <input type="text" id="searchInput" class="form-control search-bar" placeholder="Search articles on CNC, SolidWorks, Web Dev...">
+        <i class="fas fa-search search-icon"></i>
+      </div>
+      
+      <!-- Blog Container -->
+      <div class="row" id="blog-container">
+        <!-- Loading Spinner -->
+        <div class="col-12 loading-spinner">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-3">Loading latest articles...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal Preview -->
+  <div class="modal fade" id="blogModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="blogModalTitle"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="blogModalBody">
+          <!-- Modal content will be loaded here -->
+        </div>
+        <div class="modal-footer">
+          <small class="text-muted" id="blogModalMeta"></small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDTUuYYFA5Jfa5aoGrN_OA3gaslvUE-2TM",
+      authDomain: "portfolio-6367d.firebaseapp.com",
+      projectId: "portfolio-6367d",
+      storageBucket: "portfolio-6367d.firebasestorage.app",
+      messagingSenderId: "171885145177",
+      appId: "1:171885145177:web:009bd1eca84520c7af1548",
+      measurementId: "G-Y9R9S2H954"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let blogData = [];
+
+    // Advanced image loading with error handling
+    function loadImageWithFallback(imgElement, src, fallbackIcon = 'fa-file-alt') {
+      return new Promise((resolve) => {
+        const tempImg = new Image();
+        
+        tempImg.onload = function() {
+          imgElement.src = src;
+          imgElement.classList.remove('loading');
+          imgElement.classList.add('loaded');
+          resolve(true);
+        };
+        
+        tempImg.onerror = function() {
+          // Hide the broken image and show placeholder
+          imgElement.classList.remove('loading');
+          imgElement.classList.add('error');
+          
+          // Create and show placeholder
+          const placeholder = document.createElement('div');
+          placeholder.className = imgElement.classList.contains('author-image') ? 'author-placeholder' : 'blog-image-placeholder';
+          placeholder.innerHTML = `<i class="fas ${fallbackIcon}"></i>`;
+          
+          imgElement.parentNode.appendChild(placeholder);
+          resolve(false);
+        };
+        
+        // Start loading
+        tempImg.src = src;
+        
+        // Timeout after 5 seconds
+        setTimeout(() => {
+          if (!imgElement.classList.contains('loaded') && !imgElement.classList.contains('error')) {
+            tempImg.onerror();
+          }
+        }, 5000);
+      });
+    }
+
+    // Load author image with fallback
+    function loadAuthorImage(imgElement, src) {
+      return loadImageWithFallback(imgElement, src, 'fa-user');
+    }
+
+    function loadBlogCards(data) {
+      const container = document.getElementById('blog-container');
+      
+      if (data.length === 0) {
+        container.innerHTML = `
+          <div class="col-12 text-center">
+            <div class="blog_card">
+              <div class="content text-center py-5">
+                <i class="fas fa-search fa-3x mb-3" style="color: var(--primary); opacity: 0.5;"></i>
+                <h5>No articles found</h5>
+                <p>Try different search terms or check back later for new content!</p>
+                <a href="index.html" class="btn-glow mt-3">
+                  <i class="fas fa-home"></i> Back to Home
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = '';
+
+      const loadPromises = [];
+      
+      data.forEach(blog => {
+        const viewElementId = `view-${blog.id}`;
+        const card = document.createElement('div');
+        card.className = 'col-md-6 col-lg-4 mb-4';
+
+        card.innerHTML = `
+          <div class="blog_card">
+            <div class="blog-image-container">
+              <img src="" alt="${blog.title}" 
+                   class="blog-image loading"
+                   data-src="${blog.image}"
+                   data-blog-id="${blog.id}">
+            </div>
+            <div class="content">
+              <h5>${blog.title}</h5>
+              <div class="meta">
+                <span><i class="far fa-calendar"></i> ${blog.date}</span>
+                <span class="view-count" id="${viewElementId}"><i class="far fa-eye"></i> ...</span>
+              </div>
+              <p class="flex-grow-1">${blog.summary}</p>
+              ${blog.tags ? `
+                <div class="mb-3">
+                  ${blog.tags.map(tag => `<span class="blog-tag">${tag}</span>`).join('')}
+                </div>
+              ` : ''}
+              <button class="btn-glow" onclick="openModal('${blog.id}')">
+                <i class="fas fa-book-open"></i> Read Article
+              </button>
+              <div class="author-box">
+                <img src="${blog.author.image}" alt="${blog.author.name}" 
+                     class="author-image loading"
+                     data-src="${blog.author.image}">
+                <div>
+                  <div>${blog.author.name}</div>
+                  <small class="text-muted">${blog.readTime || '5 min read'}</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        container.appendChild(card);
+        
+        // Load blog image with proper handling
+        const blogImgElement = card.querySelector('.blog-image');
+        const blogLoadPromise = loadImageWithFallback(blogImgElement, blog.image, 'fa-newspaper');
+        loadPromises.push(blogLoadPromise);
+        
+        // Load author image with proper handling
+        const authorImgElement = card.querySelector('.author-image');
+        const authorLoadPromise = loadAuthorImage(authorImgElement, blog.author.image);
+        loadPromises.push(authorLoadPromise);
+        
+        updateViews(blog.id, viewElementId);
+      });
+
+      // Optional: Wait for all images to load
+      Promise.all(loadPromises).then(() => {
+        console.log('All blog images processed');
+      });
+    }
+
+    function openModal(blogId) {
+      const blog = blogData.find(b => b.id === blogId);
+      if (!blog) return;
+      
+      // Increment views when opening modal
+      incrementViews(blogId);
+      
+      document.getElementById('blogModalTitle').textContent = blog.title;
+      
+      // Create modal content with proper image handling
+      const modalBody = document.getElementById('blogModalBody');
+      modalBody.innerHTML = `
+        <div class="modal-image-container">
+          <img src="" alt="${blog.title}" 
+               class="modal-image loading"
+               data-src="${blog.image}">
+        </div>
+        <div class="blog-content">${blog.content}</div>
+      `;
+      
+      document.getElementById('blogModalMeta').innerHTML = `
+        <div class="d-flex gap-3 flex-wrap">
+          <span><i class="fas fa-user"></i> ${blog.author.name}</span>
+          <span><i class="far fa-calendar"></i> ${blog.date}</span>
+          <span><i class="far fa-clock"></i> ${blog.readTime || '5 min read'}</span>
+          ${blog.tags ? blog.tags.map(tag => `<span class="blog-tag">${tag}</span>`).join('') : ''}
+        </div>
+      `;
+      
+      // Load modal image with proper handling
+      const modalImg = modalBody.querySelector('.modal-image');
+      loadImageWithFallback(modalImg, blog.image, 'fa-newspaper');
+      
+      const modal = new bootstrap.Modal(document.getElementById('blogModal'));
+      modal.show();
+    }
+
+    function updateViews(blogId, elementId) {
+      const docRef = db.collection('blogViews').doc(blogId);
+      docRef.get().then((doc) => {
+        const views = doc.exists ? doc.data().views : 0;
+        const viewEl = document.getElementById(elementId);
+        if (viewEl) viewEl.innerHTML = `<i class="far fa-eye"></i> ${views}`;
+      }).catch((error) => {
+        console.error("Error getting views:", error);
+      });
+    }
+
+    function incrementViews(blogId) {
+      const docRef = db.collection('blogViews').doc(blogId);
+      docRef.set({
+        views: firebase.firestore.FieldValue.increment(1),
+        lastViewed: new Date()
+      }, { merge: true });
+    }
+
+    // Search filter
+    document.getElementById('searchInput').addEventListener('input', function (e) {
+      const value = e.target.value.toLowerCase();
+      const filtered = blogData.filter(blog =>
+        blog.title.toLowerCase().includes(value) ||
+        blog.summary.toLowerCase().includes(value) ||
+        (blog.tags && blog.tags.some(tag => tag.toLowerCase().includes(value)))
+      );
+      loadBlogCards(filtered);
+    });
+
+    // Load blog data from Firebase
+    function loadBlogData() {
+      db.collection('blogs')
+        .where('status', '==', 'published')
+        .orderBy('createdAt', 'desc')
+        .get()
+        .then((querySnapshot) => {
+          blogData = [];
+          querySnapshot.forEach((doc) => {
+            const blog = doc.data();
+            blog.id = doc.id;
+            blogData.push(blog);
+          });
+          loadBlogCards(blogData);
+        })
+        .catch((error) => {
+          console.error("Error loading blogs:", error);
+          document.getElementById('blog-container').innerHTML = `
+            <div class="col-12 text-center">
+              <div class="blog_card">
+                <div class="content text-center py-5">
+                  <i class="fas fa-exclamation-triangle fa-3x mb-3" style="color: #ff6b6b;"></i>
+                  <h5>Connection Error</h5>
+                  <p>Unable to load blog posts. Please check your connection and try again.</p>
+                  <div class="mt-3">
+                    <button class="btn-glow me-2" onclick="loadBlogData()">
+                      <i class="fas fa-redo"></i> Retry
+                    </button>
+                    <a href="index.html" class="btn-glow">
+                      <i class="fas fa-home"></i> Back to Home
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      loadBlogData();
+    });
+  </script>
+</body>
+</html>
