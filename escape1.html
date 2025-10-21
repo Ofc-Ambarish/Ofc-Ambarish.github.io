@@ -931,6 +931,9 @@
     let reconnectAttempts = 0;
     const MAX_RECONNECT_ATTEMPTS = 3;
 
+    // Store incoming offer for later processing
+    let pendingOffer = null;
+
     // Enhanced WebRTC Configuration with Premium Servers
     const configuration = {
       iceServers: [
@@ -1272,7 +1275,7 @@
       }
     }
 
-    // Screen Control Function
+    // Screen Control Function - ONLY for audio calls
     function toggleScreen() {
       isScreenOn = !isScreenOn;
       const screenBtn = document.getElementById('screenControlBtn');
@@ -1382,7 +1385,7 @@
       }
     }
 
-    // Incoming Call Handling
+    // Incoming Call Handling - STORE offer but don't process until acceptance
     function handleIncomingCall(callId, callData) {
       if (callInProgress) {
         db.ref(`calls/${callId}/status`).set("declined");
@@ -1404,32 +1407,11 @@
         }
       });
       
-      // Listen for offer
-      db.ref(`calls/${currentCallId}/offer`).on('value', handleIncomingOffer);
+      // Store the offer for later processing (when user accepts)
+      pendingOffer = callData.offer;
       
       // Listen for call status changes (for ending call)
       db.ref(`calls/${currentCallId}/status`).on('value', handleCallStatusChange);
-    }
-
-    async function handleIncomingOffer(snapshot) {
-      const offer = snapshot.val();
-      if (offer && !peerConnection) {
-        await setupMediaStream(isAudioCall);
-        await createPeerConnection();
-        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-        
-        // Create and send answer
-        const answer = await peerConnection.createAnswer();
-        await peerConnection.setLocalDescription(answer);
-        
-        await db.ref(`calls/${currentCallId}/answer`).set({
-          ...answer,
-          from: currentUserId
-        });
-        
-        // Listen for ICE candidates
-        db.ref(`calls/${currentCallId}/candidates/${offer.from}`).on('child_added', handleRemoteCandidate);
-      }
     }
 
     // Call UI Management
@@ -1449,12 +1431,14 @@
         container.classList.add('audio-call');
         document.querySelector('.audio-avatar').style.display = 'flex';
         muteVideoBtn.style.display = 'none';
-        screenBtn.style.display = 'none';
+        // Screen control ONLY in audio calls
+        screenBtn.style.display = 'flex';
       } else {
         container.classList.remove('audio-call');
         document.querySelector('.audio-avatar').style.display = 'none';
         muteVideoBtn.style.display = 'flex';
-        screenBtn.style.display = 'flex';
+        // No screen control in video calls
+        screenBtn.style.display = 'none';
       }
       
       switch(type) {
@@ -1476,7 +1460,8 @@
           muteAudioBtn.style.display = 'flex';
           muteVideoBtn.style.display = !audioOnly ? 'flex' : 'none';
           speakerBtn.style.display = 'flex';
-          screenBtn.style.display = !audioOnly ? 'flex' : 'none';
+          // Screen control only shown for audio calls in outgoing mode
+          screenBtn.style.display = audioOnly ? 'flex' : 'none';
           document.getElementById('callStatus').textContent = 'Calling...';
           break;
           
@@ -1487,7 +1472,8 @@
           muteAudioBtn.style.display = 'flex';
           muteVideoBtn.style.display = !audioOnly ? 'flex' : 'none';
           speakerBtn.style.display = 'flex';
-          screenBtn.style.display = !audioOnly ? 'flex' : 'none';
+          // Screen control only shown for audio calls in active mode
+          screenBtn.style.display = audioOnly ? 'flex' : 'none';
           startCallTimer();
           break;
       }
@@ -1529,8 +1515,10 @@
       // Cleanup handled in endCall
     }
 
-    // Enhanced End Call
+    // Enhanced End Call - COMPREHENSIVE cleanup
     function endCall() {
+      console.log('Ending call with comprehensive cleanup');
+      
       // Clear intervals and timeouts
       if (callDurationInterval) {
         clearInterval(callDurationInterval);
@@ -1577,10 +1565,19 @@
         peerConnection = null;
       }
       
-      // Reset UI
+      // Reset all state variables
       callInProgress = false;
       isCaller = false;
+      isAudioCall = false;
       reconnectAttempts = 0;
+      pendingOffer = null;
+      isAudioMuted = false;
+      isVideoMuted = false;
+      isSpeakerOn = false;
+      isScreenOn = true;
+      callStartTime = null;
+      
+      // Reset UI
       document.getElementById('callContainer').classList.remove('active');
       document.querySelector('.background-audio-indicator').classList.remove('visible');
       
@@ -1589,13 +1586,13 @@
       document.getElementById('muteVideo').innerHTML = '<i class="fas fa-video"></i>';
       document.getElementById('speakerBtn').classList.remove('active');
       document.getElementById('screenControlBtn').classList.remove('active');
-      isAudioMuted = false;
-      isVideoMuted = false;
-      isSpeakerOn = false;
-      isScreenOn = true;
       
       // Reset timer display
       document.getElementById('callDuration').textContent = '00:00';
+      document.getElementById('callStatus').textContent = 'Connecting...';
+      document.getElementById('callerInfo').textContent = 'User';
+      
+      console.log('Call cleanup completed');
     }
 
     // Toggle Functions
@@ -1642,13 +1639,37 @@
       this.classList.toggle('minimized');
     });
 
-    // Enhanced incoming call acceptance
+    // Enhanced incoming call acceptance - ONLY process WebRTC when user accepts
     async function acceptIncomingCall() {
       try {
+        if (!pendingOffer) {
+          throw new Error('No offer received');
+        }
+        
+        // Update status first
         db.ref(`calls/${currentCallId}/status`).set("accepted");
         showCallInterface('active', isAudioCall);
+        
+        // NOW setup media and WebRTC (only after user accepts)
         await setupMediaStream(isAudioCall);
         await createPeerConnection();
+        
+        // Process the stored offer
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(pendingOffer));
+        
+        // Create and send answer
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        
+        await db.ref(`calls/${currentCallId}/answer`).set({
+          ...answer,
+          from: currentUserId
+        });
+        
+        // Listen for ICE candidates
+        const callerId = currentCallId.split('_')[0];
+        db.ref(`calls/${currentCallId}/candidates/${callerId}`).on('child_added', handleRemoteCandidate);
+        
       } catch (error) {
         console.error('Error accepting call:', error);
         alert('Error accepting call: ' + error.message);
