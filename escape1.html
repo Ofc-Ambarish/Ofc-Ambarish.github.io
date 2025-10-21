@@ -78,7 +78,6 @@
       position: sticky;
       top: 0;
       z-index: 999;
-      /* ensure header spans full width of its container */
       width: 100%;
     }
     .back-button {
@@ -306,7 +305,7 @@
     .btn-send {
       background: linear-gradient(135deg, #007bff, #0056b3);
       border: none;
-      padding:25px;
+      padding: 15px 25px;
       color: white;
       font-weight: 600;
     }
@@ -346,7 +345,7 @@
       touch-action: pan-y;
       -webkit-user-select: none;
       user-select: none;
-      position: relative; /* for reply button */
+      position: relative;
     }
 
     /* Reply button inside message */
@@ -532,7 +531,7 @@
       color: white;
     }
     
-    .mute-audio, .mute-video, .speaker-btn {
+    .mute-audio, .mute-video, .speaker-btn, .screen-control-btn {
       background: rgba(255,255,255,0.2);
       backdrop-filter: blur(10px);
       color: white;
@@ -546,6 +545,10 @@
       background: linear-gradient(135deg, #007bff, #0056b3);
     }
     
+    .screen-control-btn.active {
+      background: linear-gradient(135deg, #6c757d, #495057);
+    }
+
     /* Connection Status */
     #connectionStatus {
       position: absolute;
@@ -632,13 +635,6 @@
       display: flex;
       align-items: center;
       gap: 8px;
-    }
-
-    /* Screen Control Button */
-    .screen-control-btn {
-      background: rgba(255,255,255,0.2);
-      backdrop-filter: blur(10px);
-      color: white;
     }
 
     /* Responsive Design */
@@ -935,10 +931,6 @@
     let reconnectAttempts = 0;
     const MAX_RECONNECT_ATTEMPTS = 3;
 
-    // Audio context for speaker control
-    let audioContext = null;
-    let audioDestination = null;
-
     // Enhanced WebRTC Configuration with Premium Servers
     const configuration = {
       iceServers: [
@@ -949,7 +941,7 @@
         { urls: 'stun:stun3.l.google.com:19302' },
         { urls: 'stun:stun4.l.google.com:19302' },
         
-        // Free TURN servers (limited but better than nothing)
+        // Free TURN servers
         { 
           urls: 'turn:numb.viagenie.ca',
           credential: 'muazkh',
@@ -957,11 +949,6 @@
         },
         {
           urls: 'turn:openrelay.metered.ca:80',
-          credential: 'openrelayproject',
-          username: 'openrelayproject'
-        },
-        {
-          urls: 'turn:openrelay.metered.ca:443',
           credential: 'openrelayproject',
           username: 'openrelayproject'
         }
@@ -1025,7 +1012,6 @@
       document.getElementById('chatHeader').style.display = 'flex';
       document.getElementById('chatArea').style.display = 'flex';
 
-      // small timeout to let browser recalc layout, then scroll chat to bottom and focus input
       setTimeout(() => {
         const chatBox = document.getElementById('chatBox');
         if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
@@ -1056,7 +1042,7 @@
       }
     });
 
-    // Bind click listeners to the hidden tap areas safely (may be multiple)
+    // Bind click listeners to the hidden tap areas
     ["hiddenTap", "hiddenTap2"].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
@@ -1067,7 +1053,7 @@
       }
     });
 
-    // Remove preload class after first paint to allow CSS transitions thereafter.
+    // Remove preload class after first paint
     window.addEventListener('DOMContentLoaded', () => {
       const removePreload = () => {
         if (document.body.classList.contains('preload')) {
@@ -1086,7 +1072,7 @@
     });
 
     // Reply state
-    let replyTo = null; // { messageId, senderId, text, senderEmail }
+    let replyTo = null;
 
     function setReply(messageId, senderId, text, senderEmail) {
       replyTo = { messageId, senderId, text, senderEmail };
@@ -1114,87 +1100,6 @@
         document.removeEventListener('click', attachCancelOnce);
       }
     });
-
-    // Attach swipe-to-reply handlers to a message element
-    function attachSwipeToReply(el, messageId, senderId, text, senderEmail) {
-      let startX = 0;
-      let startY = 0;
-      let tracking = false;
-      const threshold = 80;
-      let prevented = false;
-      let longPressTimer = null;
-      const longPressDelay = 600;
-
-      function onStart(clientX, clientY) {
-        startX = clientX;
-        startY = clientY;
-        tracking = true;
-        prevented = false;
-        el.style.transition = '';
-        clearTimeout(longPressTimer);
-        longPressTimer = setTimeout(() => {
-          setReply(messageId, senderId, text, senderEmail);
-        }, longPressDelay);
-      }
-
-      function onMove(clientX, clientY, ev) {
-        if (!tracking) return;
-        const dx = clientX - startX;
-        const dy = clientY - startY;
-        if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
-          clearTimeout(longPressTimer);
-        }
-        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 6) {
-          if (!prevented) {
-            if (ev && ev.cancelable) ev.preventDefault();
-            prevented = true;
-          }
-          el.style.transform = `translateX(${Math.max(Math.min(dx, 140), -140)}px)`;
-        }
-      }
-
-      function onEnd(clientX) {
-        if (!tracking) return;
-        tracking = false;
-        clearTimeout(longPressTimer);
-        el.style.transition = 'transform 0.15s ease';
-        const dx = clientX - startX;
-        if (Math.abs(dx) > threshold) {
-          setReply(messageId, senderId, text, senderEmail);
-        }
-        el.style.transform = '';
-      }
-
-      if (window.PointerEvent) {
-        el.addEventListener('pointerdown', (e) => {
-          if (e.pointerType === 'mouse' && e.button !== 0) return;
-          onStart(e.clientX, e.clientY);
-          el.setPointerCapture && el.setPointerCapture(e.pointerId);
-        });
-        el.addEventListener('pointermove', (e) => onMove(e.clientX, e.clientY, e));
-        el.addEventListener('pointerup', (e) => onEnd(e.clientX));
-        el.addEventListener('pointercancel', (e) => onEnd(e.clientX));
-      } else {
-        el.addEventListener('touchstart', function ts(e) {
-          const t = e.touches[0];
-          onStart(t.clientX, t.clientY);
-        }, { passive: true });
-
-        el.addEventListener('touchmove', function tm(e) {
-          const t = e.touches[0];
-          onMove(t.clientX, t.clientY, e);
-        }, { passive: false });
-
-        el.addEventListener('touchend', function te(e) {
-          const t = e.changedTouches[0];
-          onEnd(t.clientX);
-        });
-
-        el.addEventListener('mousedown', function md(e) { if (e.button === 0) onStart(e.clientX, e.clientY); });
-        el.addEventListener('mousemove', function mm(e) { onMove(e.clientX, e.clientY); });
-        el.addEventListener('mouseup', function mu(e) { onEnd(e.clientX); });
-      }
-    }
 
     // ===== ENHANCED CALL FUNCTIONS =====
 
@@ -1246,9 +1151,6 @@
           console.log('Received remote stream');
           remoteStream = event.streams[0];
           document.getElementById("remoteVideo").srcObject = remoteStream;
-          
-          // Setup audio routing
-          setupAudioRouting();
         };
         
         // Add local stream tracks
@@ -1337,9 +1239,6 @@
         localStream = await navigator.mediaDevices.getUserMedia(constraints);
         document.getElementById("localVideo").srcObject = localStream;
         
-        // Setup audio context for speaker control
-        await setupAudioContext();
-        
         return localStream;
       } catch (error) {
         console.error('Error accessing media devices:', error);
@@ -1347,27 +1246,8 @@
       }
     }
 
-    async function setupAudioContext() {
-      try {
-        audioContext = new AudioContext();
-        await audioContext.resume();
-        
-        // Create audio destination for speaker control
-        audioDestination = audioContext.createMediaStreamDestination();
-        
-        // Connect local stream to audio context
-        const source = audioContext.createMediaStreamSource(localStream);
-        source.connect(audioDestination);
-        
-      } catch (error) {
-        console.warn('Audio context not supported:', error);
-      }
-    }
-
     // Audio Routing Functions
     async function toggleSpeaker() {
-      if (!audioContext) return;
-      
       try {
         if (isSpeakerOn) {
           // Route to earpiece (default)
@@ -1389,16 +1269,6 @@
         console.warn('Speaker toggle not supported:', error);
         // Fallback: show message
         alert('Speaker control requires HTTPS and browser support');
-      }
-    }
-
-    function setupAudioRouting() {
-      // Enable background audio
-      if ('serviceWorker' in navigator && 'Notification' in window) {
-        navigator.serviceWorker.ready.then(registration => {
-          // Background audio setup
-          document.querySelector('.background-audio-indicator').classList.add('visible');
-        });
       }
     }
 
@@ -1473,6 +1343,9 @@
         // Listen for ICE candidates
         db.ref(`calls/${currentCallId}/candidates/${otherUserId}`).on('child_added', handleRemoteCandidate);
         
+        // Listen for call status changes (for ending call)
+        db.ref(`calls/${currentCallId}/status`).on('value', handleCallStatusChange);
+        
       } catch (error) {
         console.error('Error initiating call:', error);
         alert('Failed to start call: ' + error.message);
@@ -1500,6 +1373,15 @@
       }
     }
 
+    function handleCallStatusChange(snapshot) {
+      const status = snapshot.val();
+      if (status === "ended" && callInProgress) {
+        // Other user ended the call
+        document.getElementById("callStatus").textContent = "Call Ended";
+        setTimeout(endCall, 2000);
+      }
+    }
+
     // Incoming Call Handling
     function handleIncomingCall(callId, callData) {
       if (callInProgress) {
@@ -1524,6 +1406,9 @@
       
       // Listen for offer
       db.ref(`calls/${currentCallId}/offer`).on('value', handleIncomingOffer);
+      
+      // Listen for call status changes (for ending call)
+      db.ref(`calls/${currentCallId}/status`).on('value', handleCallStatusChange);
     }
 
     async function handleIncomingOffer(snapshot) {
@@ -1610,7 +1495,15 @@
 
     // Call Timer
     function startCallTimer() {
+      // Reset timer first
+      document.getElementById('callDuration').textContent = '00:00';
       callStartTime = Date.now();
+      
+      // Clear any existing interval
+      if (callDurationInterval) {
+        clearInterval(callDurationInterval);
+      }
+      
       callDurationInterval = setInterval(() => {
         const duration = Math.floor((Date.now() - callStartTime) / 1000);
         const minutes = Math.floor(duration / 60);
@@ -1655,12 +1548,7 @@
         db.ref(`calls/${currentCallId}/offer`).off();
         db.ref(`calls/${currentCallId}/answer`).off();
         db.ref(`calls/${currentCallId}/status`).off();
-        
-        const callParts = currentCallId.split('_');
-        if (callParts.length >= 2) {
-          const otherUserId = isCaller ? callParts[1] : callParts[0];
-          db.ref(`calls/${currentCallId}/candidates/${otherUserId}`).off();
-        }
+        db.ref(`calls/${currentCallId}/candidates`).off();
         
         // Mark call as ended
         db.ref(`calls/${currentCallId}/status`).set('ended');
@@ -1689,12 +1577,6 @@
         peerConnection = null;
       }
       
-      // Cleanup audio context
-      if (audioContext) {
-        audioContext.close();
-        audioContext = null;
-      }
-      
       // Reset UI
       callInProgress = false;
       isCaller = false;
@@ -1711,6 +1593,9 @@
       isVideoMuted = false;
       isSpeakerOn = false;
       isScreenOn = true;
+      
+      // Reset timer display
+      document.getElementById('callDuration').textContent = '00:00';
     }
 
     // Toggle Functions
@@ -1827,13 +1712,6 @@
             alert(error.message);
           }
         });
-    }
-
-    function logout() {
-      if (callInProgress) {
-        endCall();
-      }
-      auth.signOut().then(() => location.reload());
     }
 
     // Load users list
@@ -1956,35 +1834,9 @@
         timeDiv.className = "message-time";
         timeDiv.textContent = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
-        // Read status
-        if (msg.senderId === currentUserId) {
-          const readDiv = document.createElement("div");
-          readDiv.className = "read-status";
-          db.ref(`chats/${chatId}/messages/${msgId}/readBy`).on("value", (snap) => {
-            const readBy = snap.val() || {};
-            const otherUserRead = Object.keys(readBy).some(uid => uid !== currentUserId);
-            readDiv.textContent = otherUserRead ? '✓✓ Read' : '✓ Delivered';
-          });
-          div.appendChild(readDiv);
-        }
-
         div.appendChild(textDiv);
         div.appendChild(timeDiv);
         chatBox.appendChild(div);
-
-        // Add inline reply button for direct tap reply (good for mobile)
-        const replyBtn = document.createElement('button');
-        replyBtn.className = 'reply-btn';
-        replyBtn.title = 'Reply';
-        replyBtn.innerHTML = '↩';
-        replyBtn.addEventListener('click', (ev) => {
-          ev.stopPropagation();
-          setReply(msgId, msg.senderId, msg.text, msg.senderEmail || null);
-        });
-        div.appendChild(replyBtn);
-
-        // Attach swipe-to-reply handlers
-        attachSwipeToReply(div, msgId, msg.senderId, msg.text, msg.senderEmail || null);
 
         chatBox.scrollTop = chatBox.scrollHeight;
 
