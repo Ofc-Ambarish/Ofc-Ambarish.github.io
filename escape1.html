@@ -996,6 +996,24 @@
       return email.charAt(0).toUpperCase();
     }
 
+    // Clean up malformed calls from database
+    function cleanupMalformedCalls() {
+      db.ref("calls").once('value').then((snapshot) => {
+        const calls = snapshot.val();
+        if (calls) {
+          Object.keys(calls).forEach(callId => {
+            const callParts = callId.split('_');
+            // Remove calls where ID format doesn't match callerId
+            if (callParts.length >= 3 && calls[callId].callerId && 
+                callParts[0] !== calls[callId].callerId) {
+              console.log('Removing malformed call:', callId);
+              db.ref(`calls/${callId}`).remove();
+            }
+          });
+        }
+      });
+    }
+
     // UI Navigation
     function showUserList() {
       document.getElementById('chatHeader').style.display = 'none';
@@ -1270,8 +1288,6 @@
         }
       } catch (error) {
         console.warn('Speaker toggle not supported:', error);
-        // Fallback: show message
-        alert('Speaker control requires HTTPS and browser support');
       }
     }
 
@@ -1295,7 +1311,7 @@
       }
     }
 
-    // Enhanced Call Management
+    // Enhanced Call Management with FIXED call ID generation
     async function initiateCall(otherUserId, audioOnly = false) {
       if (callInProgress) {
         alert("You already have an active call. Please end it first.");
@@ -1305,7 +1321,17 @@
       try {
         isCaller = true;
         isAudioCall = audioOnly;
+        
+        // CRITICAL FIX: Ensure caller ID always comes first
         currentCallId = `${currentUserId}_${otherUserId}_${Date.now()}`;
+        
+        // Check if call already exists to prevent duplicates
+        const existingCall = await db.ref(`calls/${currentCallId}`).once('value');
+        if (existingCall.exists()) {
+          alert("Call already in progress. Please try again.");
+          return;
+        }
+        
         callInProgress = true;
         reconnectAttempts = 0;
         
@@ -1387,6 +1413,14 @@
 
     // Incoming Call Handling - STORE offer but don't process until acceptance
     function handleIncomingCall(callId, callData) {
+      // Validate call ID format - only process if caller ID is first
+      const callParts = callId.split('_');
+      if (callParts.length < 3 || callParts[0] !== callData.callerId) {
+        console.warn('Invalid call ID format, ignoring call:', callId);
+        db.ref(`calls/${callId}/status`).set("invalid_format");
+        return;
+      }
+      
       if (callInProgress) {
         db.ref(`calls/${callId}/status`).set("declined");
         return;
@@ -1930,6 +1964,7 @@
         loadUsers();
         listenForCalls();
         clearOldCalls();
+        cleanupMalformedCalls(); // Clean up any malformed calls on startup
         document.getElementById("loginDiv").style.display = "none";
         document.getElementById("chatDiv").style.display = "block";
       } else {
