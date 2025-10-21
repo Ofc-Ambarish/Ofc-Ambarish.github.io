@@ -1276,27 +1276,61 @@
       }
     }
 
-    // Audio Routing Functions
+    // Fixed Audio Routing Functions
     async function toggleSpeaker() {
       try {
+        // Check if the browser supports audio output device selection
+        if (!('setSinkId' in HTMLMediaElement.prototype)) {
+          console.warn('Speaker toggle not supported in this browser');
+          alert('Speaker control is not supported in your browser. Please use device controls.');
+          return;
+        }
+
+        const remoteVideo = document.getElementById('remoteVideo');
+        
         if (isSpeakerOn) {
-          // Route to earpiece (default)
-          await document.getElementById('remoteVideo').setSinkId('');
-          document.getElementById('speakerBtn').classList.remove('active');
-          isSpeakerOn = false;
+          // Switch to earpiece (default)
+          try {
+            await remoteVideo.setSinkId('');
+            document.getElementById('speakerBtn').classList.remove('active');
+            document.getElementById('speakerBtn').innerHTML = '<i class="fas fa-volume-up"></i>';
+            isSpeakerOn = false;
+            console.log('Switched to earpiece');
+          } catch (error) {
+            console.error('Error switching to earpiece:', error);
+          }
         } else {
-          // Route to speaker
-          const devices = await navigator.mediaDevices.enumerateDevices();
-          const speakers = devices.filter(device => device.kind === 'audiooutput');
-          
-          if (speakers.length > 0) {
-            await document.getElementById('remoteVideo').setSinkId(speakers[0].deviceId);
-            document.getElementById('speakerBtn').classList.add('active');
-            isSpeakerOn = true;
+          // Switch to speaker
+          try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const speakers = devices.filter(device => device.kind === 'audiooutput');
+            
+            if (speakers.length > 0 && speakers[0].deviceId) {
+              await remoteVideo.setSinkId(speakers[0].deviceId);
+              document.getElementById('speakerBtn').classList.add('active');
+              document.getElementById('speakerBtn').innerHTML = '<i class="fas fa-volume-down"></i>';
+              isSpeakerOn = true;
+              console.log('Switched to speaker');
+            } else {
+              console.warn('No speaker devices found');
+              alert('No speaker device found. Using default audio output.');
+            }
+          } catch (error) {
+            console.error('Error switching to speaker:', error);
+            // Fallback: Try to use the default speaker
+            try {
+              await remoteVideo.setSinkId('default');
+              document.getElementById('speakerBtn').classList.add('active');
+              document.getElementById('speakerBtn').innerHTML = '<i class="fas fa-volume-down"></i>';
+              isSpeakerOn = true;
+            } catch (fallbackError) {
+              console.error('Fallback also failed:', fallbackError);
+            }
           }
         }
       } catch (error) {
-        console.warn('Speaker toggle not supported:', error);
+        console.error('Speaker toggle error:', error);
+        alert('Error switching audio output. Please check browser permissions.');
       }
     }
 
@@ -1352,6 +1386,11 @@
         
         // Create peer connection
         await createPeerConnection();
+        
+        // Initialize speaker state properly
+        isSpeakerOn = false;
+        document.getElementById('speakerBtn').classList.remove('active');
+        document.getElementById('speakerBtn').innerHTML = '<i class="fas fa-volume-up"></i>';
         
         // Create and send offer
         const offer = await peerConnection.createOffer();
@@ -1615,7 +1654,7 @@
       pendingOffer = null;
       isAudioMuted = false;
       isVideoMuted = false;
-      isSpeakerOn = false;
+      isSpeakerOn = false; // Reset speaker state
       isScreenOn = true;
       callStartTime = null;
       
@@ -1628,6 +1667,7 @@
       document.getElementById('muteAudio').innerHTML = '<i class="fas fa-microphone"></i>';
       document.getElementById('muteVideo').innerHTML = '<i class="fas fa-video"></i>';
       document.getElementById('speakerBtn').classList.remove('active');
+      document.getElementById('speakerBtn').innerHTML = '<i class="fas fa-volume-up"></i>';
       document.getElementById('screenControlBtn').classList.remove('active');
       
       // Reset timer display
@@ -1696,6 +1736,11 @@
         // NOW setup media and WebRTC (only after user accepts)
         await setupMediaStream(isAudioCall);
         await createPeerConnection();
+        
+        // Initialize speaker state properly
+        isSpeakerOn = false;
+        document.getElementById('speakerBtn').classList.remove('active');
+        document.getElementById('speakerBtn').innerHTML = '<i class="fas fa-volume-up"></i>';
         
         // Process the stored offer
         await peerConnection.setRemoteDescription(new RTCSessionDescription(pendingOffer));
