@@ -637,6 +637,15 @@
       gap: 8px;
     }
 
+    /* Screen Control Styles */
+    .screen-off #videoContainer {
+      filter: brightness(0);
+    }
+    
+    .screen-off #callInfoBar {
+      opacity: 0.3;
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
       #localVideo {
@@ -1291,27 +1300,26 @@
       }
     }
 
-    // Screen Control Function - ONLY for audio calls
+    // Screen Control Function
     function toggleScreen() {
       isScreenOn = !isScreenOn;
       const screenBtn = document.getElementById('screenControlBtn');
+      const callContainer = document.getElementById('callContainer');
       
       if (isScreenOn) {
         // Turn screen on
-        document.getElementById('videoContainer').style.filter = 'none';
-        document.getElementById('callInfoBar').style.opacity = '1';
+        callContainer.classList.remove('screen-off');
         screenBtn.innerHTML = '<i class="fas fa-mobile-screen"></i>';
         screenBtn.classList.remove('active');
       } else {
         // Turn screen off (simulate proximity sensor)
-        document.getElementById('videoContainer').style.filter = 'brightness(0)';
-        document.getElementById('callInfoBar').style.opacity = '0.3';
+        callContainer.classList.add('screen-off');
         screenBtn.innerHTML = '<i class="fas fa-mobile"></i>';
         screenBtn.classList.add('active');
       }
     }
 
-    // Enhanced Call Management with FIXED call ID generation
+    // Enhanced Call Management with FIXED call ID generation for BOTH audio and video calls
     async function initiateCall(otherUserId, audioOnly = false) {
       if (callInProgress) {
         alert("You already have an active call. Please end it first.");
@@ -1322,7 +1330,7 @@
         isCaller = true;
         isAudioCall = audioOnly;
         
-        // CRITICAL FIX: Ensure caller ID always comes first
+        // CRITICAL FIX: Ensure caller ID always comes first for BOTH audio and video calls
         currentCallId = `${currentUserId}_${otherUserId}_${Date.now()}`;
         
         // Check if call already exists to prevent duplicates
@@ -1411,7 +1419,7 @@
       }
     }
 
-    // Incoming Call Handling - STORE offer but don't process until acceptance
+    // Incoming Call Handling - STORE offer but don't process until acceptance for BOTH audio and video calls
     function handleIncomingCall(callId, callData) {
       // Validate call ID format - only process if caller ID is first
       const callParts = callId.split('_');
@@ -1465,14 +1473,14 @@
         container.classList.add('audio-call');
         document.querySelector('.audio-avatar').style.display = 'flex';
         muteVideoBtn.style.display = 'none';
-        // Screen control ONLY in audio calls
+        // Screen control available for both audio and video calls
         screenBtn.style.display = 'flex';
       } else {
         container.classList.remove('audio-call');
         document.querySelector('.audio-avatar').style.display = 'none';
         muteVideoBtn.style.display = 'flex';
-        // No screen control in video calls
-        screenBtn.style.display = 'none';
+        // Screen control available for both audio and video calls
+        screenBtn.style.display = 'flex';
       }
       
       switch(type) {
@@ -1494,8 +1502,8 @@
           muteAudioBtn.style.display = 'flex';
           muteVideoBtn.style.display = !audioOnly ? 'flex' : 'none';
           speakerBtn.style.display = 'flex';
-          // Screen control only shown for audio calls in outgoing mode
-          screenBtn.style.display = audioOnly ? 'flex' : 'none';
+          // Screen control available for both audio and video calls
+          screenBtn.style.display = 'flex';
           document.getElementById('callStatus').textContent = 'Calling...';
           break;
           
@@ -1506,8 +1514,8 @@
           muteAudioBtn.style.display = 'flex';
           muteVideoBtn.style.display = !audioOnly ? 'flex' : 'none';
           speakerBtn.style.display = 'flex';
-          // Screen control only shown for audio calls in active mode
-          screenBtn.style.display = audioOnly ? 'flex' : 'none';
+          // Screen control available for both audio and video calls
+          screenBtn.style.display = 'flex';
           startCallTimer();
           break;
       }
@@ -1549,7 +1557,7 @@
       // Cleanup handled in endCall
     }
 
-    // Enhanced End Call - COMPREHENSIVE cleanup
+    // Enhanced End Call - COMPREHENSIVE cleanup for BOTH audio and video calls
     function endCall() {
       console.log('Ending call with comprehensive cleanup');
       
@@ -1613,6 +1621,7 @@
       
       // Reset UI
       document.getElementById('callContainer').classList.remove('active');
+      document.getElementById('callContainer').classList.remove('screen-off');
       document.querySelector('.background-audio-indicator').classList.remove('visible');
       
       // Reset button states
@@ -1673,7 +1682,7 @@
       this.classList.toggle('minimized');
     });
 
-    // Enhanced incoming call acceptance - ONLY process WebRTC when user accepts
+    // Enhanced incoming call acceptance - ONLY process WebRTC when user accepts for BOTH audio and video calls
     async function acceptIncomingCall() {
       try {
         if (!pendingOffer) {
