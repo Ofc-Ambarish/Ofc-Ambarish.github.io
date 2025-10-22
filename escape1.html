@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -7,25 +7,25 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
-    /* Prevent initial animations/transition flash while page loads */
-    .preload *,
-    .preload *::before,
-    .preload *::after {
-      transition: none !important;
-      animation: none !important;
-      will-change: auto !important;
+    /* Reset and base styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
-
-    /* Body Background */
+    
     body {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       color: #333;
-      transition: background 0.3s, color 0.3s;
       min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
       margin: 0;
-      padding: 0;
     }
+
     body.dark-mode {
       background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
       color: #e0e0e0;
@@ -34,14 +34,18 @@
     /* Main Container */
     .main-container {
       background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px); 
+      backdrop-filter: blur(10px);
       border-radius: 20px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.1);
       overflow: hidden;
       border: 1px solid rgba(255,255,255,0.2);
+      width: 100%;
+      max-width: 800px;
       height: 90vh;
       max-height: 90vh;
+      display: none;
     }
+
     body.dark-mode .main-container {
       background: rgba(30, 30, 30, 0.95);
       border-color: rgba(255,255,255,0.1);
@@ -56,25 +60,26 @@
       flex-direction: column;
       justify-content: center;
     }
+
     #loginDiv h3 {
       font-weight: 700;
       margin-bottom: 1.5rem;
       color: #4a4a4a;
     }
+
     body.dark-mode #loginDiv h3 {
       color: #e0e0e0;
     }
 
     /* Chat Container */
     #chatDiv {
-      display: flex;
+      display: none;
       flex-direction: column;
       height: 100%;
-      padding: 0;
       position: relative;
     }
 
-    /* Chat Header - Fixed at top */
+    /* Chat Header - Fixed */
     .chat-header {
       background: linear-gradient(135deg, #007bff, #0056b3);
       color: white;
@@ -85,10 +90,10 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       position: sticky;
       top: 0;
-      z-index: 999;
-      width: 100%;
+      z-index: 100;
       flex-shrink: 0;
     }
+
     .back-button {
       background: transparent;
       border: none;
@@ -99,9 +104,11 @@
       border-radius: 50%;
       transition: background 0.3s ease;
     }
+
     .back-button:hover {
       background: rgba(255,255,255,0.2);
     }
+
     .user-avatar {
       width: 45px;
       height: 45px;
@@ -112,22 +119,27 @@
       justify-content: center;
       font-size: 1.2rem;
     }
+
     .user-info {
       flex: 1;
     }
+
     .user-name {
       font-weight: 600;
       font-size: 1.1rem;
       margin-bottom: 2px;
     }
+
     .user-status {
       font-size: 0.85rem;
       opacity: 0.9;
     }
+
     .header-call-buttons {
       display: flex;
       gap: 10px;
     }
+
     .header-call-btn {
       background: rgba(255,255,255,0.2);
       border: none;
@@ -142,20 +154,29 @@
       transition: all 0.3s ease;
       font-size: 1.1rem;
     }
+
     .header-call-btn:hover {
       background: rgba(255,255,255,0.3);
       transform: scale(1.1);
     }
 
     /* User List */
+    #userListContainer {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
     #userList {
       flex: 1;
       overflow-y: auto;
       background: #f8f9fa;
     }
+
     body.dark-mode #userList {
       background: #2d3748;
     }
+
     .user-item {
       padding: 15px;
       border-bottom: 1px solid #e9ecef;
@@ -165,15 +186,19 @@
       align-items: center;
       gap: 15px;
     }
+
     .user-item:hover {
       background: #e3f2fd;
     }
+
     body.dark-mode .user-item {
       border-color: #4a5568;
     }
+
     body.dark-mode .user-item:hover {
       background: #2d3748;
     }
+
     .user-item-avatar {
       width: 40px;
       height: 40px;
@@ -185,37 +210,38 @@
       color: white;
       font-weight: 600;
     }
+
     .user-item-info {
       flex: 1;
     }
+
     .user-item-name {
       font-weight: 500;
       margin-bottom: 2px;
     }
+
     .user-item-status {
       font-size: 0.8rem;
       opacity: 0.7;
     }
 
-    /* Chat Area Layout - FIXED */
+    /* Chat Area - FIXED LAYOUT */
     #chatArea {
       display: none;
       height: 100%;
       flex-direction: column;
-      position: relative;
     }
 
-    /* Chat Box - Scrollable messages area - FIXED */
+    /* Chat Messages Container */
     #chatBox {
       flex: 1;
-      background: #f8f9fa;
-      padding: 1rem;
       overflow-y: auto;
+      padding: 1rem;
+      background: #f8f9fa;
       display: flex;
       flex-direction: column;
-      min-height: 0;
-      position: relative;
     }
+
     body.dark-mode #chatBox {
       background: #2d3748;
     }
@@ -229,21 +255,20 @@
       word-wrap: break-word;
       position: relative;
       animation: messageAppear 0.3s ease-out;
-      touch-action: pan-y;
-      -webkit-user-select: none;
-      user-select: none;
-      transition: transform 0.3s ease;
     }
+
     @keyframes messageAppear {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
     .sent {
       background: linear-gradient(135deg, #007bff, #0056b3);
       color: white;
       margin-left: auto;
       border-bottom-right-radius: 5px;
     }
+
     .received {
       background: white;
       color: #333;
@@ -251,24 +276,174 @@
       margin-right: auto;
       border-bottom-left-radius: 5px;
     }
+
     body.dark-mode .received {
       background: #4a5568;
       color: #e0e0e0;
       border-color: #6b7280;
     }
+
     .message-time {
       font-size: 0.75rem;
       opacity: 0.7;
       margin-top: 5px;
       text-align: right;
     }
-    .read-status {
-      font-size: 0.7rem;
-      opacity: 0.6;
-      margin-top: 2px;
+
+    /* Input Area - Fixed at bottom */
+    .input-area {
+      padding: 1rem;
+      background: white;
+      border-top: 1px solid #e9ecef;
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
     }
 
-    /* Swipe to Reply Styles */
+    body.dark-mode .input-area {
+      background: #2d3748;
+      border-color: #4a5568;
+    }
+
+    .input-group {
+      border-radius: 25px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .form-control {
+      border: none;
+      padding: 15px 20px;
+      font-size: 1rem;
+      flex: 1;
+    }
+
+    .form-control:focus {
+      box-shadow: none;
+    }
+
+    .btn-send {
+      background: linear-gradient(135deg, #007bff, #0056b3);
+      border: none;
+      padding: 15px 25px;
+      color: white;
+      font-weight: 600;
+    }
+
+    /* Typing Indicator */
+    #typingIndicator {
+      font-style: italic;
+      color: #6c757d;
+      padding: 10px;
+      font-size: 0.9rem;
+      background: #f8f9fa;
+      border-radius: 10px;
+      margin: 5px 0;
+      align-self: flex-start;
+      max-width: fit-content;
+      display: none;
+    }
+
+    body.dark-mode #typingIndicator {
+      background: #4a5568;
+      color: #e0e0e0;
+    }
+
+    /* Date Divider */
+    .date-divider {
+      text-align: center;
+      margin: 20px 0;
+      color: #6c757d;
+      font-size: 0.8rem;
+      position: relative;
+    }
+
+    .date-divider::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: #dee2e6;
+    }
+
+    .date-divider span {
+      background: #f8f9fa;
+      padding: 0 15px;
+      position: relative;
+      z-index: 2;
+    }
+
+    body.dark-mode .date-divider span {
+      background: #2d3748;
+    }
+
+    body.dark-mode .date-divider::before {
+      background: #4a5568;
+    }
+
+    /* Reply preview */
+    #replyPreview {
+      display: none;
+      padding: 8px 12px;
+      border-left: 4px solid #007bff;
+      background: #f1f5f9;
+      color: #111827;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.95rem;
+    }
+
+    body.dark-mode #replyPreview { 
+      background: #1f2937; 
+      color: #e5e7eb; 
+    }
+
+    #replyPreview .reply-excerpt { 
+      flex: 1; 
+      overflow: hidden; 
+      text-overflow: ellipsis; 
+      white-space: nowrap; 
+    }
+
+    #replyPreview .reply-cancel { 
+      background: transparent; 
+      border: none; 
+      font-size: 1.1rem; 
+      cursor: pointer; 
+    }
+
+    /* Quoted reply */
+    .reply-quote {
+      border-left: 3px solid rgba(0,123,255,0.6);
+      padding: 6px 10px;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+      color: #1f2937;
+      background: rgba(0,123,255,0.03);
+      border-radius: 6px;
+    }
+
+    body.dark-mode .reply-quote { 
+      color: #e5e7eb; 
+      background: rgba(255,255,255,0.03); 
+    }
+
+    /* Swipe to Reply */
+    .message {
+      touch-action: pan-y;
+      -webkit-user-select: none;
+      user-select: none;
+      transition: transform 0.3s ease;
+    }
+
     .message.swiping {
       transition: transform 0.1s ease;
     }
@@ -292,125 +467,28 @@
       display: flex;
     }
 
-    /* Date Divider */
-    .date-divider {
-      text-align: center;
-      margin: 20px 0;
-      color: #6c757d;
-      font-size: 0.8rem;
-      position: relative;
-    }
-    .date-divider::before {
-      content: "";
-      position: absolute;
-      top: 50%;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: #dee2e6;
-    }
-    .date-divider span {
-      background: #f8f9fa;
-      padding: 0 15px;
-      position: relative;
-      z-index: 2;
-    }
-    body.dark-mode .date-divider span {
-      background: #2d3748;
-    }
-    body.dark-mode .date-divider::before {
-      background: #4a5568;
-    }
-
-    /* Input Area - Fixed at bottom - FIXED */
-    .input-area {
-      padding: 1rem;
-      background: white;
-      border-top: 1px solid #e9ecef;
-      position: sticky;
-      bottom: 0;
-      z-index: 10;
-      flex-shrink: 0;
-    }
-    body.dark-mode .input-area {
-      background: #2d3748;
-      border-color: #4a5568;
-    }
-    .input-group {
-      border-radius: 25px;
-      overflow: hidden;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    .form-control {
+    /* Theme Toggle */
+    #toggleTheme {
+      background: transparent;
       border: none;
-      padding: 15px 20px;
-      font-size: 1rem;
-      flex: 1;
-    }
-    .form-control:focus {
-      box-shadow: none;
-    }
-    .btn-send {
-      background: linear-gradient(135deg, #007bff, #0056b3);
-      border: none;
-      padding: 15px 25px;
       color: white;
-      font-weight: 600;
-    }
-
-    /* Reply preview above input */
-    #replyPreview {
-      display: none;
-      padding: 8px 12px;
-      border-left: 4px solid #007bff;
-      background: #f1f5f9;
-      color: #111827;
-      border-radius: 8px;
-      margin-bottom: 8px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      font-size: 0.95rem;
+      justify-content: center;
     }
-    body.dark-mode #replyPreview { background: #1f2937; color: #e5e7eb; }
-    #replyPreview .reply-excerpt { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    #replyPreview .reply-cancel { background: transparent; border: none; font-size: 1.1rem; cursor: pointer; }
 
-    /* Quoted reply inside a message */
-    .reply-quote {
-      border-left: 3px solid rgba(0,123,255,0.6);
-      padding: 6px 10px;
-      margin-bottom: 8px;
-      font-size: 0.85rem;
-      color: #1f2937;
-      background: rgba(0,123,255,0.03);
-      border-radius: 6px;
-    }
-    body.dark-mode .reply-quote { color: #e5e7eb; background: rgba(255,255,255,0.03); }
-
-    /* Typing Indicator */
-    #typingIndicator {
-      font-style: italic;
-      color: #6c757d;
-      padding: 10px;
-      font-size: 0.9rem;
-      background: #f8f9fa;
-      border-radius: 10px;
-      margin: 5px 0;
-      align-self: flex-start;
-      max-width: fit-content;
-      display: none;
-    }
-    body.dark-mode #typingIndicator {
-      background: #4a5568;
-      color: #e0e0e0;
+    #toggleTheme:hover {
+      transform: rotate(30deg);
+      background: rgba(255,255,255,0.2);
     }
 
     /* ===== ENHANCED CALL STYLES ===== */
-    /* Enhanced Call Container */
     #callContainer {
       position: fixed;
       top: 0;
@@ -670,8 +748,50 @@
       opacity: 0.3;
     }
 
+    /* Animation for call buttons */
+    @keyframes buttonPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    .pulse {
+      animation: buttonPulse 2s infinite;
+    }
+
+    /* Call Accepted Banner */
+    .call-accepted-banner {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+      z-index: 10001;
+      animation: bannerSlide 0.5s ease-out;
+    }
+    @keyframes bannerSlide {
+      from { top: -100px; opacity: 0; }
+      to { top: 20px; opacity: 1; }
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
+      .main-container {
+        height: 95vh;
+        margin: 0;
+        border-radius: 0;
+      }
+      
+      body {
+        padding: 0;
+      }
+
       #localVideo {
         width: 100px;
         height: 140px;
@@ -712,90 +832,16 @@
       #callerInfo {
         font-size: 1rem;
       }
-
-      .main-container {
-        margin: 10px;
-        border-radius: 15px;
-        height: 95vh;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      #localVideo {
-        width: 80px;
-        height: 120px;
-      }
-      
-      .control-btn {
-        width: 55px;
-        height: 55px;
-        font-size: 1.2rem;
-      }
-      
-      .control-btn-lg {
-        width: 65px;
-        height: 65px;
-      }
-      
-      #callControls {
-        gap: 15px;
-      }
     }
 
-    /* Animation for call buttons */
-    @keyframes buttonPulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
-    }
-    
-    .pulse {
-      animation: buttonPulse 2s infinite;
-    }
-
-    /* Call Accepted Banner */
-    .call-accepted-banner {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: linear-gradient(135deg, #28a745, #20c997);
+    /* Welcome Page */
+    #errorPage {
+      text-align: center;
       color: white;
-      padding: 15px 30px;
-      border-radius: 50px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
-      z-index: 10001;
-      animation: bannerSlide 0.5s ease-out;
-    }
-    @keyframes bannerSlide {
-      from { top: -100px; opacity: 0; }
-      to { top: 20px; opacity: 1; }
-    }
-
-    /* Theme Toggle */
-    #toggleTheme {
-      background: transparent;
-      border: none;
-      color: white;
-      font-size: 1.2rem;
-      cursor: pointer;
-      transition: transform 0.3s ease;
-      width: 45px;
-      height: 45px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    #toggleTheme:hover {
-      transform: rotate(30deg);
-      background: rgba(255,255,255,0.2);
     }
   </style>
 </head>
-<body class="preload d-flex align-items-center justify-content-center vh-100">
+<body class="d-flex align-items-center justify-content-center">
   <div id="hiddenTap" style="position:fixed;top:0;left:0;width:50px;height:50px;opacity:0;z-index:9999;"></div>
   
   <div id="errorPage" class="text-center text-white" style="display:block;">
@@ -804,7 +850,7 @@
     <div id="hiddenTap2" style="width:100px;height:100px;margin:0 auto;opacity:0;cursor:pointer;">&nbsp;</div>
   </div>
 
-  <div class="main-container" style="display:none;max-width:800px;width:95%;">
+  <div class="main-container">
     <div id="loginDiv">
       <h3><i class="fas fa-comments me-2"></i>Join Escape Chat</h3>
       <input id="email" type="email" placeholder="Enter your email" class="form-control mb-3" />
@@ -815,8 +861,8 @@
       </div>
     </div>
 
-    <div id="chatDiv" style="display:none;">
-      <!-- Chat Header (Visible when chat is active) -->
+    <div id="chatDiv">
+      <!-- Chat Header -->
       <div id="chatHeader" class="chat-header" style="display:none;">
         <button class="back-button" onclick="showUserList()">
           <i class="fas fa-arrow-left"></i>
@@ -838,7 +884,7 @@
         </div>
       </div>
 
-      <!-- User List (Default view) -->
+      <!-- User List -->
       <div id="userListContainer" style="height: 100%; display: flex; flex-direction: column;">
         <div class="chat-header">
           <div class="user-info">
@@ -850,7 +896,7 @@
         <div id="userList"></div>
       </div>
 
-      <!-- Chat Area (Visible when user is selected) -->
+      <!-- Chat Area -->
       <div id="chatArea" style="display:none; height: 100%; flex-direction: column;">
         <div id="chatBox"></div>
         <div id="typingIndicator" class="small" style="display:none;">
@@ -981,31 +1027,12 @@
     let swipeCurrentMessage = null;
     const swipeThreshold = 10;
 
-    // Enhanced WebRTC Configuration with Premium Servers
+    // Enhanced WebRTC Configuration
     const configuration = {
       iceServers: [
-        // Free STUN servers
         { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' },
-        { urls: 'stun:stun3.l.google.com:19302' },
-        { urls: 'stun:stun4.l.google.com:19302' },
-        
-        // Free TURN servers
-        { 
-          urls: 'turn:numb.viagenie.ca',
-          credential: 'muazkh',
-          username: 'webrtc@live.com'
-        },
-        {
-          urls: 'turn:openrelay.metered.ca:80',
-          credential: 'openrelayproject',
-          username: 'openrelayproject'
-        }
-      ],
-      iceCandidatePoolSize: 10,
-      bundlePolicy: 'max-bundle',
-      rtcpMuxPolicy: 'require'
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ]
     };
 
     // Utility functions
@@ -1050,7 +1077,6 @@
         if (calls) {
           Object.keys(calls).forEach(callId => {
             const callParts = callId.split('_');
-            // Remove calls where ID format doesn't match callerId
             if (callParts.length >= 3 && calls[callId].callerId && 
                 callParts[0] !== calls[callId].callerId) {
               console.log('Removing malformed call:', callId);
@@ -1088,7 +1114,7 @@
         
         // Initialize swipe functionality for the new chat
         initializeSwipeToReply();
-      }, 80);
+      }, 100);
 
       startChatWith(userId);
     }
@@ -1113,7 +1139,7 @@
       }
     });
 
-    // Bind click listeners to the hidden tap areas
+    // Hidden tap areas
     ["hiddenTap", "hiddenTap2"].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
@@ -1121,24 +1147,6 @@
           document.getElementById("errorPage").style.display = "none";
           document.querySelector(".main-container").style.display = "block";
         });
-      }
-    });
-
-    // Remove preload class after first paint
-    window.addEventListener('DOMContentLoaded', () => {
-      const removePreload = () => {
-        if (document.body.classList.contains('preload')) {
-          document.body.classList.remove('preload');
-        }
-      };
-
-      if (window.requestAnimationFrame) {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(removePreload);
-        });
-        setTimeout(removePreload, 250);
-      } else {
-        setTimeout(removePreload, 60);
       }
     });
 
@@ -1152,10 +1160,8 @@
       chatBox.addEventListener('touchend', handleTouchEnd);
       
       function handleTouchStart(e) {
-        // Find the message element that was touched
         swipeCurrentMessage = e.target.closest('.message');
         if (!swipeCurrentMessage || swipeCurrentMessage.classList.contains('sent')) {
-          // Only allow swipe on received messages
           swipeCurrentMessage = null;
           return;
         }
@@ -1164,10 +1170,8 @@
         swipeStartX = touch.clientX;
         swipeCurrentX = swipeStartX;
         
-        // Add swiping class for performance
         swipeCurrentMessage.classList.add('swiping');
         
-        // Create reply indicator if it doesn't exist
         if (!swipeCurrentMessage.querySelector('.reply-indicator')) {
           const indicator = document.createElement('div');
           indicator.className = 'reply-indicator';
@@ -1186,13 +1190,10 @@
         
         const diffX = swipeStartX - swipeCurrentX;
         
-        // Only allow left swipe (positive diffX)
         if (diffX > 0) {
-          // Calculate transform based on swipe distance (capped at 100px)
           const translateX = Math.min(diffX, 100);
           swipeCurrentMessage.style.transform = `translateX(-${translateX}px)`;
           
-          // Show reply indicator when threshold is reached
           if (diffX >= swipeThreshold) {
             swipeCurrentMessage.classList.add('swipe-active');
           } else {
@@ -1208,7 +1209,6 @@
         
         const diffX = swipeStartX - swipeCurrentX;
         
-        // If swipe distance exceeds threshold, trigger reply
         if (diffX >= swipeThreshold) {
           const messageId = swipeCurrentMessage.dataset.messageId;
           const senderId = swipeCurrentMessage.dataset.senderId;
@@ -1220,14 +1220,13 @@
           }
         }
         
-        // Reset message position
         swipeCurrentMessage.style.transform = '';
         swipeCurrentMessage.classList.remove('swiping', 'swipe-active');
         swipeCurrentMessage = null;
       }
     }
 
-    // Reply state
+    // Reply functionality
     let replyTo = null;
 
     function setReply(messageId, senderId, text, senderEmail) {
@@ -1247,14 +1246,6 @@
       const excerpt = document.getElementById('replyExcerpt');
       if (excerpt) excerpt.textContent = '';
     }
-
-    // Attach cancel handler
-    document.addEventListener('DOMContentLoaded', function() {
-      const btn = document.getElementById('cancelReplyBtn');
-      if (btn) {
-        btn.addEventListener('click', cancelReply);
-      }
-    });
 
     // ===== ENHANCED CALL FUNCTIONS =====
 
@@ -1292,7 +1283,7 @@
           console.log('ICE connection state:', peerConnection.iceConnectionState);
         };
         
-        // Handle ICE candidates with better error handling
+        // Handle ICE candidates
         peerConnection.onicecandidate = (event) => {
           if (event.candidate) {
             console.log('New ICE candidate:', event.candidate);
@@ -1401,10 +1392,351 @@
       }
     }
 
+    // Enhanced Call Management
+    async function initiateCall(otherUserId, audioOnly = false) {
+      if (callInProgress) {
+        alert("You already have an active call. Please end it first.");
+        return;
+      }
+      
+      try {
+        isCaller = true;
+        isAudioCall = audioOnly;
+        
+        currentCallId = `${currentUserId}_${otherUserId}_${Date.now()}`;
+        
+        // Check if call already exists to prevent duplicates
+        const existingCall = await db.ref(`calls/${currentCallId}`).once('value');
+        if (existingCall.exists()) {
+          alert("Call already in progress. Please try again.");
+          return;
+        }
+        
+        callInProgress = true;
+        reconnectAttempts = 0;
+        
+        // Show calling UI
+        showCallInterface('outgoing', audioOnly);
+        document.getElementById("callerInfo").textContent = "Calling...";
+        
+        // Setup media
+        await setupMediaStream(audioOnly);
+        
+        // Create peer connection
+        await createPeerConnection();
+        
+        // Create and send offer
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        
+        // Save call to Firebase
+        await db.ref(`calls/${currentCallId}`).set({
+          callerId: currentUserId,
+          receiverId: otherUserId,
+          status: "calling",
+          isAudioCall: audioOnly,
+          offer: offer,
+          timestamp: Date.now()
+        });
+        
+        // Set connection timeout
+        connectionTimeout = setTimeout(() => {
+          if (peerConnection.connectionState !== 'connected') {
+            onCallFailed();
+          }
+        }, 30000);
+        
+        // Listen for answer
+        db.ref(`calls/${currentCallId}/answer`).on('value', handleAnswer);
+        
+        // Listen for ICE candidates
+        db.ref(`calls/${currentCallId}/candidates/${otherUserId}`).on('child_added', handleRemoteCandidate);
+        
+        // Listen for call status changes (for ending call)
+        db.ref(`calls/${currentCallId}/status`).on('value', handleCallStatusChange);
+        
+      } catch (error) {
+        console.error('Error initiating call:', error);
+        alert('Failed to start call: ' + error.message);
+        endCall();
+      }
+    }
+
+    async function handleAnswer(snapshot) {
+      const answer = snapshot.val();
+      if (answer && peerConnection) {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        clearTimeout(connectionTimeout);
+      }
+    }
+
+    async function handleRemoteCandidate(snapshot) {
+      const candidateData = snapshot.val();
+      if (candidateData && peerConnection.remoteDescription) {
+        try {
+          const candidate = new RTCIceCandidate(candidateData);
+          await peerConnection.addIceCandidate(candidate);
+        } catch (error) {
+          console.warn('Error adding ICE candidate:', error);
+        }
+      }
+    }
+
+    function handleCallStatusChange(snapshot) {
+      const status = snapshot.val();
+      if (status === "ended" && callInProgress) {
+        // Other user ended the call
+        document.getElementById("callStatus").textContent = "Call Ended";
+        setTimeout(endCall, 2000);
+      }
+    }
+
+    // Incoming Call Handling
+    function handleIncomingCall(callId, callData) {
+      const callParts = callId.split('_');
+      if (callParts.length < 3 || callParts[0] !== callData.callerId) {
+        console.warn('Invalid call ID format, ignoring call:', callId);
+        db.ref(`calls/${callId}/status`).set("invalid_format");
+        return;
+      }
+      
+      if (callInProgress) {
+        db.ref(`calls/${callId}/status`).set("declined");
+        return;
+      }
+      
+      currentCallId = callId;
+      callInProgress = true;
+      isCaller = false;
+      isAudioCall = callData.isAudioCall || false;
+      
+      showCallInterface('incoming', isAudioCall);
+      
+      // Get caller info
+      db.ref(`users/${callData.callerId}`).once('value', (snapshot) => {
+        const userData = snapshot.val();
+        if (userData) {
+          document.getElementById("callerInfo").textContent = userData.email;
+        }
+      });
+      
+      // Store the offer for later processing (when user accepts)
+      pendingOffer = callData.offer;
+      
+      // Listen for call status changes (for ending call)
+      db.ref(`calls/${currentCallId}/status`).on('value', handleCallStatusChange);
+    }
+
+    // Call UI Management
+    function showCallInterface(type, audioOnly) {
+      const container = document.getElementById('callContainer');
+      const acceptBtn = document.getElementById('acceptCall');
+      const declineBtn = document.getElementById('declineCall');
+      const endBtn = document.getElementById('endCall');
+      const muteAudioBtn = document.getElementById('muteAudio');
+      const muteVideoBtn = document.getElementById('muteVideo');
+      const speakerBtn = document.getElementById('speakerBtn');
+      const screenBtn = document.getElementById('screenControlBtn');
+      
+      container.classList.add('active');
+      
+      if (audioOnly) {
+        container.classList.add('audio-call');
+        document.querySelector('.audio-avatar').style.display = 'flex';
+        muteVideoBtn.style.display = 'none';
+        screenBtn.style.display = 'flex';
+      } else {
+        container.classList.remove('audio-call');
+        document.querySelector('.audio-avatar').style.display = 'none';
+        muteVideoBtn.style.display = 'flex';
+        screenBtn.style.display = 'flex';
+      }
+      
+      switch(type) {
+        case 'incoming':
+          acceptBtn.style.display = 'flex';
+          declineBtn.style.display = 'flex';
+          endBtn.style.display = 'none';
+          muteAudioBtn.style.display = 'none';
+          muteVideoBtn.style.display = 'none';
+          speakerBtn.style.display = 'none';
+          screenBtn.style.display = 'none';
+          document.getElementById('callStatus').textContent = 'Incoming Call';
+          break;
+          
+        case 'outgoing':
+          acceptBtn.style.display = 'none';
+          declineBtn.style.display = 'none';
+          endBtn.style.display = 'flex';
+          muteAudioBtn.style.display = 'flex';
+          muteVideoBtn.style.display = !audioOnly ? 'flex' : 'none';
+          speakerBtn.style.display = 'flex';
+          screenBtn.style.display = 'flex';
+          document.getElementById('callStatus').textContent = 'Calling...';
+          break;
+          
+        case 'active':
+          acceptBtn.style.display = 'none';
+          declineBtn.style.display = 'none';
+          endBtn.style.display = 'flex';
+          muteAudioBtn.style.display = 'flex';
+          muteVideoBtn.style.display = !audioOnly ? 'flex' : 'none';
+          speakerBtn.style.display = 'flex';
+          screenBtn.style.display = 'flex';
+          startCallTimer();
+          break;
+      }
+    }
+
+    // Call Timer
+    function startCallTimer() {
+      document.getElementById('callDuration').textContent = '00:00';
+      callStartTime = Date.now();
+      
+      if (callDurationInterval) {
+        clearInterval(callDurationInterval);
+      }
+      
+      callDurationInterval = setInterval(() => {
+        const duration = Math.floor((Date.now() - callStartTime) / 1000);
+        const minutes = Math.floor(duration / 60);
+        const seconds = duration % 60;
+        document.getElementById('callDuration').textContent = 
+          `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      }, 1000);
+    }
+
+    // Call Event Handlers
+    function onCallConnected() {
+      showCallInterface('active', isAudioCall);
+      showCallAcceptedBanner();
+      reconnectAttempts = 0;
+    }
+
+    function onCallFailed() {
+      alert('Call failed to connect. Please try again.');
+      endCall();
+    }
+
+    function onCallClosed() {
+      // Cleanup handled in endCall
+    }
+
+    // Enhanced End Call - COMPREHENSIVE cleanup
+    function endCall() {
+      console.log('Ending call with comprehensive cleanup');
+      
+      // Clear intervals and timeouts
+      if (callDurationInterval) {
+        clearInterval(callDurationInterval);
+        callDurationInterval = null;
+      }
+      
+      if (connectionTimeout) {
+        clearTimeout(connectionTimeout);
+        connectionTimeout = null;
+      }
+      
+      // Cleanup Firebase listeners
+      if (currentCallId) {
+        db.ref(`calls/${currentCallId}`).off();
+        db.ref(`calls/${currentCallId}/offer`).off();
+        db.ref(`calls/${currentCallId}/answer`).off();
+        db.ref(`calls/${currentCallId}/status`).off();
+        db.ref(`calls/${currentCallId}/candidates`).off();
+        
+        // Mark call as ended
+        db.ref(`calls/${currentCallId}/status`).set('ended');
+        
+        setTimeout(() => {
+          db.ref(`calls/${currentCallId}`).remove();
+        }, 5000);
+        
+        currentCallId = null;
+      }
+      
+      // Cleanup media streams
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+      }
+      
+      if (remoteStream) {
+        remoteStream.getTracks().forEach(track => track.stop());
+        remoteStream = null;
+      }
+      
+      // Cleanup peer connection
+      if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+      }
+      
+      // Reset all state variables
+      callInProgress = false;
+      isCaller = false;
+      isAudioCall = false;
+      reconnectAttempts = 0;
+      pendingOffer = null;
+      isAudioMuted = false;
+      isVideoMuted = false;
+      isSpeakerOn = false;
+      isScreenOn = true;
+      callStartTime = null;
+      
+      // Reset UI
+      document.getElementById('callContainer').classList.remove('active');
+      document.getElementById('callContainer').classList.remove('screen-off');
+      document.querySelector('.background-audio-indicator').classList.remove('visible');
+      
+      // Reset button states
+      document.getElementById('muteAudio').innerHTML = '<i class="fas fa-microphone"></i>';
+      document.getElementById('muteVideo').innerHTML = '<i class="fas fa-video"></i>';
+      document.getElementById('speakerBtn').classList.remove('active');
+      document.getElementById('speakerBtn').innerHTML = '<i class="fas fa-volume-up"></i>';
+      document.getElementById('screenControlBtn').classList.remove('active');
+      
+      // Reset timer display
+      document.getElementById('callDuration').textContent = '00:00';
+      document.getElementById('callStatus').textContent = 'Connecting...';
+      document.getElementById('callerInfo').textContent = 'User';
+      
+      console.log('Call cleanup completed');
+    }
+
+    // Toggle Functions
+    function toggleAudio() {
+      if (localStream) {
+        const audioTracks = localStream.getAudioTracks();
+        audioTracks.forEach(track => {
+          track.enabled = !track.enabled;
+        });
+        isAudioMuted = !isAudioMuted;
+        document.getElementById("muteAudio").innerHTML = isAudioMuted ? 
+          '<i class="fas fa-microphone-slash"></i>' : '<i class="fas fa-microphone"></i>';
+        document.getElementById("muteAudio").classList.toggle('active', isAudioMuted);
+      }
+    }
+
+    function toggleVideo() {
+      if (localStream && !isAudioCall) {
+        const videoTracks = localStream.getVideoTracks();
+        videoTracks.forEach(track => {
+          track.enabled = !track.enabled;
+        });
+        isVideoMuted = !isVideoMuted;
+        document.getElementById("muteVideo").innerHTML = isVideoMuted ? 
+          '<i class="fas fa-video-slash"></i>' : '<i class="fas fa-video"></i>';
+        document.getElementById("muteVideo").classList.toggle('active', isVideoMuted);
+        
+        // Toggle local video display
+        document.getElementById('localVideo').style.display = isVideoMuted ? 'none' : 'block';
+      }
+    }
+
     // Fixed Audio Routing Functions
     async function toggleSpeaker() {
       try {
-        // Check if the browser supports audio output device selection
         if (!('setSinkId' in HTMLMediaElement.prototype)) {
           console.warn('Speaker toggle not supported in this browser');
           alert('Speaker control is not supported in your browser. Please use device controls.');
@@ -1478,361 +1810,6 @@
       }
     }
 
-    // Enhanced Call Management with FIXED call ID generation for BOTH audio and video calls
-    async function initiateCall(otherUserId, audioOnly = false) {
-      if (callInProgress) {
-        alert("You already have an active call. Please end it first.");
-        return;
-      }
-      
-      try {
-        isCaller = true;
-        isAudioCall = audioOnly;
-        
-        // CRITICAL FIX: Ensure caller ID always comes first for BOTH audio and video calls
-        currentCallId = `${currentUserId}_${otherUserId}_${Date.now()}`;
-        
-        // Check if call already exists to prevent duplicates
-        const existingCall = await db.ref(`calls/${currentCallId}`).once('value');
-        if (existingCall.exists()) {
-          alert("Call already in progress. Please try again.");
-          return;
-        }
-        
-        callInProgress = true;
-        reconnectAttempts = 0;
-        
-        // Show calling UI
-        showCallInterface('outgoing', audioOnly);
-        document.getElementById("callerInfo").textContent = "Calling...";
-        
-        // Setup media
-        await setupMediaStream(audioOnly);
-        
-        // Create peer connection
-        await createPeerConnection();
-        
-        // Initialize speaker state properly
-        isSpeakerOn = false;
-        document.getElementById('speakerBtn').classList.remove('active');
-        document.getElementById('speakerBtn').innerHTML = '<i class="fas fa-volume-up"></i>';
-        
-        // Create and send offer
-        const offer = await peerConnection.createOffer();
-        await peerConnection.setLocalDescription(offer);
-        
-        // Save call to Firebase
-        await db.ref(`calls/${currentCallId}`).set({
-          callerId: currentUserId,
-          receiverId: otherUserId,
-          status: "calling",
-          isAudioCall: audioOnly,
-          offer: offer,
-          timestamp: Date.now()
-        });
-        
-        // Set connection timeout
-        connectionTimeout = setTimeout(() => {
-          if (peerConnection.connectionState !== 'connected') {
-            onCallFailed();
-          }
-        }, 30000);
-        
-        // Listen for answer
-        db.ref(`calls/${currentCallId}/answer`).on('value', handleAnswer);
-        
-        // Listen for ICE candidates
-        db.ref(`calls/${currentCallId}/candidates/${otherUserId}`).on('child_added', handleRemoteCandidate);
-        
-        // Listen for call status changes (for ending call)
-        db.ref(`calls/${currentCallId}/status`).on('value', handleCallStatusChange);
-        
-      } catch (error) {
-        console.error('Error initiating call:', error);
-        alert('Failed to start call: ' + error.message);
-        endCall();
-      }
-    }
-
-    async function handleAnswer(snapshot) {
-      const answer = snapshot.val();
-      if (answer && peerConnection) {
-        await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-        clearTimeout(connectionTimeout);
-      }
-    }
-
-    async function handleRemoteCandidate(snapshot) {
-      const candidateData = snapshot.val();
-      if (candidateData && peerConnection.remoteDescription) {
-        try {
-          const candidate = new RTCIceCandidate(candidateData);
-          await peerConnection.addIceCandidate(candidate);
-        } catch (error) {
-          console.warn('Error adding ICE candidate:', error);
-        }
-      }
-    }
-
-    function handleCallStatusChange(snapshot) {
-      const status = snapshot.val();
-      if (status === "ended" && callInProgress) {
-        // Other user ended the call
-        document.getElementById("callStatus").textContent = "Call Ended";
-        setTimeout(endCall, 2000);
-      }
-    }
-
-    // Incoming Call Handling - STORE offer but don't process until acceptance for BOTH audio and video calls
-    function handleIncomingCall(callId, callData) {
-      // Validate call ID format - only process if caller ID is first
-      const callParts = callId.split('_');
-      if (callParts.length < 3 || callParts[0] !== callData.callerId) {
-        console.warn('Invalid call ID format, ignoring call:', callId);
-        db.ref(`calls/${callId}/status`).set("invalid_format");
-        return;
-      }
-      
-      if (callInProgress) {
-        db.ref(`calls/${callId}/status`).set("declined");
-        return;
-      }
-      
-      currentCallId = callId;
-      callInProgress = true;
-      isCaller = false;
-      isAudioCall = callData.isAudioCall || false;
-      
-      showCallInterface('incoming', isAudioCall);
-      
-      // Get caller info
-      db.ref(`users/${callData.callerId}`).once('value', (snapshot) => {
-        const userData = snapshot.val();
-        if (userData) {
-          document.getElementById("callerInfo").textContent = userData.email;
-        }
-      });
-      
-      // Store the offer for later processing (when user accepts)
-      pendingOffer = callData.offer;
-      
-      // Listen for call status changes (for ending call)
-      db.ref(`calls/${currentCallId}/status`).on('value', handleCallStatusChange);
-    }
-
-    // Call UI Management
-    function showCallInterface(type, audioOnly) {
-      const container = document.getElementById('callContainer');
-      const acceptBtn = document.getElementById('acceptCall');
-      const declineBtn = document.getElementById('declineCall');
-      const endBtn = document.getElementById('endCall');
-      const muteAudioBtn = document.getElementById('muteAudio');
-      const muteVideoBtn = document.getElementById('muteVideo');
-      const speakerBtn = document.getElementById('speakerBtn');
-      const screenBtn = document.getElementById('screenControlBtn');
-      
-      container.classList.add('active');
-      
-      if (audioOnly) {
-        container.classList.add('audio-call');
-        document.querySelector('.audio-avatar').style.display = 'flex';
-        muteVideoBtn.style.display = 'none';
-        // Screen control available for both audio and video calls
-        screenBtn.style.display = 'flex';
-      } else {
-        container.classList.remove('audio-call');
-        document.querySelector('.audio-avatar').style.display = 'none';
-        muteVideoBtn.style.display = 'flex';
-        // Screen control available for both audio and video calls
-        screenBtn.style.display = 'flex';
-      }
-      
-      switch(type) {
-        case 'incoming':
-          acceptBtn.style.display = 'flex';
-          declineBtn.style.display = 'flex';
-          endBtn.style.display = 'none';
-          muteAudioBtn.style.display = 'none';
-          muteVideoBtn.style.display = 'none';
-          speakerBtn.style.display = 'none';
-          screenBtn.style.display = 'none';
-          document.getElementById('callStatus').textContent = 'Incoming Call';
-          break;
-          
-        case 'outgoing':
-          acceptBtn.style.display = 'none';
-          declineBtn.style.display = 'none';
-          endBtn.style.display = 'flex';
-          muteAudioBtn.style.display = 'flex';
-          muteVideoBtn.style.display = !audioOnly ? 'flex' : 'none';
-          speakerBtn.style.display = 'flex';
-          // Screen control available for both audio and video calls
-          screenBtn.style.display = 'flex';
-          document.getElementById('callStatus').textContent = 'Calling...';
-          break;
-          
-        case 'active':
-          acceptBtn.style.display = 'none';
-          declineBtn.style.display = 'none';
-          endBtn.style.display = 'flex';
-          muteAudioBtn.style.display = 'flex';
-          muteVideoBtn.style.display = !audioOnly ? 'flex' : 'none';
-          speakerBtn.style.display = 'flex';
-          // Screen control available for both audio and video calls
-          screenBtn.style.display = 'flex';
-          startCallTimer();
-          break;
-      }
-    }
-
-    // Call Timer
-    function startCallTimer() {
-      // Reset timer first
-      document.getElementById('callDuration').textContent = '00:00';
-      callStartTime = Date.now();
-      
-      // Clear any existing interval
-      if (callDurationInterval) {
-        clearInterval(callDurationInterval);
-      }
-      
-      callDurationInterval = setInterval(() => {
-        const duration = Math.floor((Date.now() - callStartTime) / 1000);
-        const minutes = Math.floor(duration / 60);
-        const seconds = duration % 60;
-        document.getElementById('callDuration').textContent = 
-          `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-      }, 1000);
-    }
-
-    // Call Event Handlers
-    function onCallConnected() {
-      showCallInterface('active', isAudioCall);
-      showCallAcceptedBanner();
-      reconnectAttempts = 0;
-    }
-
-    function onCallFailed() {
-      alert('Call failed to connect. Please try again.');
-      endCall();
-    }
-
-    function onCallClosed() {
-      // Cleanup handled in endCall
-    }
-
-    // Enhanced End Call - COMPREHENSIVE cleanup for BOTH audio and video calls
-    function endCall() {
-      console.log('Ending call with comprehensive cleanup');
-      
-      // Clear intervals and timeouts
-      if (callDurationInterval) {
-        clearInterval(callDurationInterval);
-        callDurationInterval = null;
-      }
-      
-      if (connectionTimeout) {
-        clearTimeout(connectionTimeout);
-        connectionTimeout = null;
-      }
-      
-      // Cleanup Firebase listeners
-      if (currentCallId) {
-        db.ref(`calls/${currentCallId}`).off();
-        db.ref(`calls/${currentCallId}/offer`).off();
-        db.ref(`calls/${currentCallId}/answer`).off();
-        db.ref(`calls/${currentCallId}/status`).off();
-        db.ref(`calls/${currentCallId}/candidates`).off();
-        
-        // Mark call as ended
-        db.ref(`calls/${currentCallId}/status`).set('ended');
-        
-        setTimeout(() => {
-          db.ref(`calls/${currentCallId}`).remove();
-        }, 5000);
-        
-        currentCallId = null;
-      }
-      
-      // Cleanup media streams
-      if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
-        localStream = null;
-      }
-      
-      if (remoteStream) {
-        remoteStream.getTracks().forEach(track => track.stop());
-        remoteStream = null;
-      }
-      
-      // Cleanup peer connection
-      if (peerConnection) {
-        peerConnection.close();
-        peerConnection = null;
-      }
-      
-      // Reset all state variables
-      callInProgress = false;
-      isCaller = false;
-      isAudioCall = false;
-      reconnectAttempts = 0;
-      pendingOffer = null;
-      isAudioMuted = false;
-      isVideoMuted = false;
-      isSpeakerOn = false; // Reset speaker state
-      isScreenOn = true;
-      callStartTime = null;
-      
-      // Reset UI
-      document.getElementById('callContainer').classList.remove('active');
-      document.getElementById('callContainer').classList.remove('screen-off');
-      document.querySelector('.background-audio-indicator').classList.remove('visible');
-      
-      // Reset button states
-      document.getElementById('muteAudio').innerHTML = '<i class="fas fa-microphone"></i>';
-      document.getElementById('muteVideo').innerHTML = '<i class="fas fa-video"></i>';
-      document.getElementById('speakerBtn').classList.remove('active');
-      document.getElementById('speakerBtn').innerHTML = '<i class="fas fa-volume-up"></i>';
-      document.getElementById('screenControlBtn').classList.remove('active');
-      
-      // Reset timer display
-      document.getElementById('callDuration').textContent = '00:00';
-      document.getElementById('callStatus').textContent = 'Connecting...';
-      document.getElementById('callerInfo').textContent = 'User';
-      
-      console.log('Call cleanup completed');
-    }
-
-    // Toggle Functions
-    function toggleAudio() {
-      if (localStream) {
-        const audioTracks = localStream.getAudioTracks();
-        audioTracks.forEach(track => {
-          track.enabled = !track.enabled;
-        });
-        isAudioMuted = !isAudioMuted;
-        document.getElementById("muteAudio").innerHTML = isAudioMuted ? 
-          '<i class="fas fa-microphone-slash"></i>' : '<i class="fas fa-microphone"></i>';
-        document.getElementById("muteAudio").classList.toggle('active', isAudioMuted);
-      }
-    }
-
-    function toggleVideo() {
-      if (localStream && !isAudioCall) {
-        const videoTracks = localStream.getVideoTracks();
-        videoTracks.forEach(track => {
-          track.enabled = !track.enabled;
-        });
-        isVideoMuted = !isVideoMuted;
-        document.getElementById("muteVideo").innerHTML = isVideoMuted ? 
-          '<i class="fas fa-video-slash"></i>' : '<i class="fas fa-video"></i>';
-        document.getElementById("muteVideo").classList.toggle('active', isVideoMuted);
-        
-        // Toggle local video display
-        document.getElementById('localVideo').style.display = isVideoMuted ? 'none' : 'block';
-      }
-    }
-
     // Event Listeners for Enhanced Call Controls
     document.getElementById("acceptCall").addEventListener("click", acceptIncomingCall);
     document.getElementById("declineCall").addEventListener("click", declineIncomingCall);
@@ -1847,7 +1824,7 @@
       this.classList.toggle('minimized');
     });
 
-    // Enhanced incoming call acceptance - ONLY process WebRTC when user accepts for BOTH audio and video calls
+    // Enhanced incoming call acceptance
     async function acceptIncomingCall() {
       try {
         if (!pendingOffer) {
@@ -2003,7 +1980,7 @@
       });
     }
 
-    // Render message function with swipe support
+    // Render message function
     function renderMessage(msg, msgId) {
       const div = document.createElement("div");
       div.className = msg.senderId === currentUserId ? "message sent" : "message received";
@@ -2011,7 +1988,6 @@
       div.dataset.senderId = msg.senderId;
       div.dataset.senderEmail = msg.senderEmail || '';
 
-      // If this message is a reply, render quoted text
       if (msg.replyTo && msg.replyTo.text) {
         const quote = document.createElement('div');
         quote.className = 'reply-quote';
@@ -2127,7 +2103,6 @@
         const isTyping = document.getElementById("messageInput").value.trim().length > 0;
         db.ref(`chats/${chatId}/typing/${currentUserId}`).set(isTyping);
         
-        // Clear typing indicator after 3 seconds of inactivity
         clearTimeout(window.typingTimeout);
         window.typingTimeout = setTimeout(() => {
           db.ref(`chats/${chatId}/typing/${currentUserId}`).set(false);
@@ -2160,7 +2135,7 @@
         loadUsers();
         listenForCalls();
         clearOldCalls();
-        cleanupMalformedCalls(); // Clean up any malformed calls on startup
+        cleanupMalformedCalls();
         document.getElementById("loginDiv").style.display = "none";
         document.getElementById("chatDiv").style.display = "block";
       } else {
@@ -2176,9 +2151,15 @@
       }
     });
 
-    // Initialize swipe functionality when DOM is loaded
+    // Initialize when DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
-      // Initialize swipe to reply after a short delay to ensure DOM is ready
+      // Initialize reply cancel button
+      const btn = document.getElementById('cancelReplyBtn');
+      if (btn) {
+        btn.addEventListener('click', cancelReply);
+      }
+      
+      // Initialize swipe functionality
       setTimeout(initializeSwipeToReply, 500);
     });
   </script>
