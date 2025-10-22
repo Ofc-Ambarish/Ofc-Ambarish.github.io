@@ -23,7 +23,8 @@
       color: #333;
       transition: background 0.3s, color 0.3s;
       min-height: 100vh;
-      overflow: hidden;
+      margin: 0;
+      padding: 0;
     }
     body.dark-mode {
       background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
@@ -39,6 +40,7 @@
       overflow: hidden;
       border: 1px solid rgba(255,255,255,0.2);
       height: 90vh;
+      max-height: 90vh;
     }
     body.dark-mode .main-container {
       background: rgba(30, 30, 30, 0.95);
@@ -49,6 +51,10 @@
     #loginDiv {
       padding: 2rem;
       text-align: center;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     #loginDiv h3 {
       font-weight: 700;
@@ -65,6 +71,7 @@
       flex-direction: column;
       height: 100%;
       padding: 0;
+      position: relative;
     }
 
     /* Chat Header - Fixed at top */
@@ -190,7 +197,7 @@
       opacity: 0.7;
     }
 
-    /* Chat Area Layout */
+    /* Chat Area Layout - FIXED */
     #chatArea {
       display: none;
       height: 100%;
@@ -198,7 +205,7 @@
       position: relative;
     }
 
-    /* Chat Box - Scrollable messages area */
+    /* Chat Box - Scrollable messages area - FIXED */
     #chatBox {
       flex: 1;
       background: #f8f9fa;
@@ -206,8 +213,8 @@
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      position: relative;
       min-height: 0;
+      position: relative;
     }
     body.dark-mode #chatBox {
       background: #2d3748;
@@ -315,7 +322,7 @@
       background: #4a5568;
     }
 
-    /* Input Area - Fixed at bottom */
+    /* Input Area - Fixed at bottom - FIXED */
     .input-area {
       padding: 1rem;
       background: white;
@@ -972,7 +979,7 @@
     let swipeStartX = 0;
     let swipeCurrentX = 0;
     let swipeCurrentMessage = null;
-    const swipeThreshold = 50;
+    const swipeThreshold = 10;
 
     // Enhanced WebRTC Configuration with Premium Servers
     const configuration = {
