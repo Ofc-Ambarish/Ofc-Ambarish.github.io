@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <title>Escape Chat - Enhanced Calls</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
-    /* Reset & base - prevent page scrolling */
+    /* Reset & base */
     * { box-sizing: border-box; }
     html, body {
       height: 100%;
-      overflow: hidden;
       margin: 0;
       padding: 0;
+      overflow: hidden;
       position: fixed;
       width: 100%;
       top: 0;
@@ -33,20 +33,22 @@
       color: #e0e0e0;
     }
 
-    /* Main Container - dynamic height set by JS */
+    /* Main Container */
     .main-container {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(10px);
-      border-radius: 20px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
       border: 1px solid rgba(255,255,255,0.2);
       width: 95%;
       max-width: 800px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      transition: height 0.15s ease-out, max-height 0.15s ease-out;
       position: relative;
+      height: 90vh;
+      max-height: 90vh;
+      transition: height 0.15s ease-out;
     }
     body.dark-mode .main-container {
       background: rgba(30, 30, 30, 0.95);
@@ -72,7 +74,7 @@
       color: #e0e0e0;
     }
 
-    /* Chat container - uses flex column to manage space */
+    /* Chat container */
     #chatDiv {
       display: none;
       flex-direction: column;
@@ -86,37 +88,42 @@
     .chat-header {
       background: linear-gradient(135deg, #007bff, #0056b3);
       color: white;
-      padding: 0.8rem 1.2rem;
+      padding: 12px 16px;
       display: flex;
       align-items: center;
       gap: 12px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       flex-shrink: 0;
       width: 100%;
-      min-height: 60px;
+      min-height: 56px;
     }
     .back-button {
       background: transparent;
       border: none;
       color: white;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       cursor: pointer;
       padding: 6px;
       border-radius: 50%;
       transition: background 0.3s ease;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .back-button:hover {
       background: rgba(255,255,255,0.2);
     }
     .user-avatar {
-      width: 40px;
-      height: 40px;
+      width: 38px;
+      height: 38px;
       background: rgba(255,255,255,0.2);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1rem;
+      font-size: 0.9rem;
       flex-shrink: 0;
     }
     .user-info {
@@ -125,34 +132,34 @@
     }
     .user-name {
       font-weight: 600;
-      font-size: 1rem;
-      margin-bottom: 2px;
+      font-size: 0.95rem;
+      margin-bottom: 1px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .user-status {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       opacity: 0.9;
     }
     .header-call-buttons {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       flex-shrink: 0;
     }
     .header-call-btn {
-      background: rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.15);
       border: none;
       color: white;
-      width: 38px;
-      height: 38px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       transition: all 0.3s ease;
-      font-size: 1rem;
+      font-size: 0.9rem;
     }
     .header-call-btn:hover {
       background: rgba(255,255,255,0.3);
@@ -171,7 +178,7 @@
       flex: 1;
       overflow-y: auto;
       background: #f8f9fa;
-      padding-bottom: 10px;
+      padding-bottom: 8px;
     }
     body.dark-mode #userList {
       background: #2d3748;
@@ -218,11 +225,11 @@
       text-overflow: ellipsis;
     }
     .user-item-status {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       opacity: 0.7;
     }
 
-    /* Chat Area - the key part: flex column, uses available space */
+    /* Chat Area */
     #chatArea {
       display: none;
       flex-direction: column;
@@ -230,18 +237,21 @@
       min-height: 0;
       height: 100%;
       overflow: hidden;
+      position: relative;
     }
 
-    /* Chat Box - scrollable messages, takes remaining space */
+    /* Chat Box */
     #chatBox {
       flex: 1;
       background: #f8f9fa;
       padding: 12px 14px;
       overflow-y: auto;
+      overflow-x: hidden;
       display: flex;
       flex-direction: column;
       min-height: 0;
       width: 100%;
+      -webkit-overflow-scrolling: touch;
     }
     body.dark-mode #chatBox {
       background: #2d3748;
@@ -249,7 +259,7 @@
 
     /* Messages */
     .message {
-      margin: 4px 0;
+      margin: 3px 0;
       padding: 10px 14px;
       border-radius: 18px;
       max-width: 80%;
@@ -257,13 +267,15 @@
       position: relative;
       animation: messageAppear 0.2s ease-out;
       cursor: pointer;
-      transition: transform 0.1s ease;
+      transition: all 0.15s ease;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
     .message:active {
-      transform: scale(0.98);
+      transform: scale(0.97);
     }
     @keyframes messageAppear {
-      from { opacity: 0; transform: translateY(8px); }
+      from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
     .sent {
@@ -285,7 +297,7 @@
       border-color: #6b7280;
     }
     .message-time {
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       opacity: 0.7;
       margin-top: 4px;
       text-align: right;
@@ -294,22 +306,29 @@
       border-left: 3px solid rgba(0,123,255,0.6);
       padding: 4px 8px;
       margin-bottom: 6px;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: #1f2937;
-      background: rgba(0,123,255,0.03);
+      background: rgba(0,123,255,0.05);
       border-radius: 6px;
     }
-    body.dark-mode .reply-quote { color: #e5e7eb; background: rgba(255,255,255,0.03); }
+    body.dark-mode .reply-quote { color: #e5e7eb; background: rgba(255,255,255,0.05); }
+
+    /* Reply highlight */
+    .message.replying {
+      border: 2px solid #007bff;
+      box-shadow: 0 0 15px rgba(0,123,255,0.2);
+      transform: scale(1.02);
+    }
 
     /* Typing Indicator */
     #typingIndicator {
       font-style: italic;
       color: #6c757d;
-      padding: 6px 12px;
-      font-size: 0.85rem;
+      padding: 4px 12px;
+      font-size: 0.8rem;
       background: #f8f9fa;
       border-radius: 10px;
-      margin: 4px 0;
+      margin: 2px 0;
       align-self: flex-start;
       max-width: fit-content;
       flex-shrink: 0;
@@ -319,14 +338,13 @@
       color: #e0e0e0;
     }
 
-    /* Input Area - fixed at bottom, shrinks with keyboard */
+    /* Input Area */
     .input-area {
-      padding: 8px 12px;
+      padding: 6px 12px 8px;
       background: white;
       border-top: 1px solid #e9ecef;
       flex-shrink: 0;
       width: 100%;
-      transition: padding 0.1s ease;
     }
     body.dark-mode .input-area {
       background: #2d3748;
@@ -340,18 +358,20 @@
       gap: 6px;
       align-items: center;
       background: #f1f3f5;
+      padding: 2px;
     }
     body.dark-mode .input-group {
       background: #3d4a5c;
     }
     .form-control {
       border: none;
-      padding: 10px 16px;
-      font-size: 0.95rem;
+      padding: 8px 14px;
+      font-size: 0.9rem;
       flex: 1;
       background: transparent;
       outline: none;
-      min-height: 44px;
+      min-height: 38px;
+      height: 38px;
     }
     .form-control:focus {
       box-shadow: none;
@@ -359,40 +379,43 @@
     .btn-send {
       background: linear-gradient(135deg, #007bff, #0056b3);
       border: none;
-      padding: 10px 20px;
+      padding: 8px 18px;
       color: white;
       font-weight: 600;
       border-radius: 25px;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       white-space: nowrap;
       flex-shrink: 0;
+      height: 36px;
+      display: flex;
+      align-items: center;
     }
 
     /* Reply preview */
     #replyPreview {
       display: none;
-      padding: 6px 12px;
+      padding: 4px 10px;
       border-left: 4px solid #007bff;
       background: #f1f5f9;
       color: #111827;
       border-radius: 8px;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       flex-shrink: 0;
     }
     body.dark-mode #replyPreview { background: #1f2937; color: #e5e7eb; }
     #replyPreview .reply-excerpt { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    #replyPreview .reply-cancel { background: transparent; border: none; font-size: 1rem; cursor: pointer; }
+    #replyPreview .reply-cancel { background: transparent; border: none; font-size: 0.9rem; cursor: pointer; padding: 0 4px; }
 
     /* Date divider */
     .date-divider {
       text-align: center;
-      margin: 12px 0;
+      margin: 8px 0;
       color: #6c757d;
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       position: relative;
     }
     .date-divider::before {
@@ -406,7 +429,7 @@
     }
     .date-divider span {
       background: #f8f9fa;
-      padding: 0 12px;
+      padding: 0 10px;
       position: relative;
       z-index: 2;
     }
@@ -417,7 +440,7 @@
       background: #4a5568;
     }
 
-    /* Call UI - same as before, keep it */
+    /* Call UI */
     #callContainer {
       position: fixed;
       top: 0;
@@ -495,19 +518,19 @@
       z-index: 3;
     }
     .control-btn {
-      width: 65px;
-      height: 65px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       border: none;
       cursor: pointer;
       transition: all 0.3s ease;
       box-shadow: 0 8px 25px rgba(0,0,0,0.3);
     }
-    .control-btn-lg { width: 75px; height: 75px; font-size: 1.6rem; }
+    .control-btn-lg { width: 70px; height: 70px; font-size: 1.5rem; }
     .accept-call { background: linear-gradient(135deg, #00d400, #00a800); color: white; }
     .decline-call, .end-call { background: linear-gradient(135deg, #ff3b30, #d70015); color: white; }
     .mute-audio, .mute-video, .speaker-btn, .screen-control-btn {
@@ -590,8 +613,13 @@
       100% { transform: scale(1); }
     }
     #toggleTheme {
-      background: transparent; border: none; font-size: 1.2rem; cursor: pointer;
+      background: transparent; border: none; font-size: 1.1rem; cursor: pointer;
       transition: transform 0.3s ease;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     #toggleTheme:hover { transform: rotate(30deg); }
     .background-audio-indicator {
@@ -606,7 +634,8 @@
       .main-container {
         width: 100%;
         border-radius: 0;
-        margin: 0;
+        height: 100vh;
+        max-height: 100vh;
       }
       #localVideo { width: 100px; height: 140px; top: 15px; right: 15px; }
       #localVideo.minimized { width: 70px; height: 100px; }
@@ -619,12 +648,6 @@
       .control-btn { width: 50px; height: 50px; font-size: 1rem; }
       .control-btn-lg { width: 60px; height: 60px; font-size: 1.2rem; }
     }
-
-    /* Reply highlight when tapping */
-    .message.replying {
-      border: 2px solid #007bff;
-      box-shadow: 0 0 10px rgba(0,123,255,0.3);
-    }
   </style>
 </head>
 <body>
@@ -632,7 +655,7 @@
   <div class="main-container" id="mainContainer">
     <!-- Login -->
     <div id="loginDiv">
-      <h3><i class="fas fa-comments me-2"></i>Join Escape Chat</h3>
+      <h3><i class="fas fa-comments me-2"></i>Escape Chat</h3>
       <input id="email" type="email" placeholder="Enter your email" class="form-control mb-3" />
       <input id="password" type="password" placeholder="Enter your password" class="form-control mb-4" />
       <div class="d-grid gap-2">
@@ -643,7 +666,7 @@
 
     <!-- Chat -->
     <div id="chatDiv">
-      <!-- Chat Header (hidden initially) -->
+      <!-- Chat Header -->
       <div id="chatHeader" class="chat-header" style="display:none;">
         <button class="back-button" onclick="showUserList()"><i class="fas fa-arrow-left"></i></button>
         <div class="user-avatar"><i class="fas fa-user"></i></div>
@@ -760,6 +783,7 @@
       document.getElementById('userListContainer').style.display = 'flex';
       document.getElementById('chatArea').style.display = 'none';
       selectedUserId = null; selectedUserEmail = null;
+      cancelReply();
     }
     function showChatArea(userId, userEmail, userStatus) {
       selectedUserId = userId; selectedUserEmail = userEmail;
@@ -768,15 +792,18 @@
       document.getElementById('userListContainer').style.display = 'none';
       document.getElementById('chatHeader').style.display = 'flex';
       document.getElementById('chatArea').style.display = 'flex';
-      setTimeout(() => { const box=document.getElementById('chatBox'); if(box) box.scrollTop=box.scrollHeight; document.getElementById('messageInput').focus(); }, 100);
+      setTimeout(() => { 
+        const box=document.getElementById('chatBox'); 
+        if(box) box.scrollTop = box.scrollHeight; 
+        document.getElementById('messageInput').focus(); 
+      }, 150);
       startChatWith(userId);
     }
     function startVideoCall() { if(selectedUserId) initiateCall(selectedUserId, false); }
     function startAudioCall() { if(selectedUserId) initiateCall(selectedUserId, true); }
 
-    // Reply - TAP ON MESSAGE to reply
+    // Reply - TAP ON MESSAGE
     function setReply(mid, sid, text, semail, messageElement) {
-      // Remove highlight from all messages
       document.querySelectorAll('.message.replying').forEach(el => el.classList.remove('replying'));
       
       replyTo = { messageId: mid, senderId: sid, text, senderEmail: semail };
@@ -785,11 +812,11 @@
       excerpt.textContent = text.length > 120 ? text.slice(0,117)+'...' : text;
       preview.style.display = 'flex';
       
-      // Highlight the message being replied to
       if (messageElement) {
         messageElement.classList.add('replying');
-        // Scroll to the message
-        messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
       }
       
       document.getElementById('messageInput').focus();
@@ -799,7 +826,6 @@
       replyTo = null; 
       document.getElementById('replyPreview').style.display = 'none'; 
       document.getElementById('replyExcerpt').textContent = '';
-      // Remove highlight
       document.querySelectorAll('.message.replying').forEach(el => el.classList.remove('replying'));
     }
     
@@ -811,7 +837,7 @@
       } 
     });
 
-    // ===== CALL FUNCTIONS (simplified, same logic) =====
+    // ===== CALL FUNCTIONS =====
     async function createPeerConnection() {
       peerConnection = new RTCPeerConnection(configuration);
       peerConnection.onconnectionstatechange = () => { const s=peerConnection.connectionState; updateConnectionStatus(s); if(s==='connected') onCallConnected(); else if(s==='disconnected') attemptReconnection(); else if(s==='failed') onCallFailed(); else if(s==='closed') onCallClosed(); };
@@ -983,6 +1009,7 @@
     function startChatWith(otherUserId) {
       chatId = currentUserId < otherUserId ? `${currentUserId}_${otherUserId}` : `${otherUserId}_${currentUserId}`;
       document.getElementById("chatBox").innerHTML = "";
+      cancelReply();
       db.ref(`users/${otherUserId}`).on("value", (snapshot) => {
         const data = snapshot.val(); let st = "Offline";
         if(data.online) st = '<i class="fas fa-circle text-success me-1"></i>Online';
@@ -1007,28 +1034,19 @@
         const div = document.createElement("div"); 
         div.className = msg.senderId === currentUserId ? "message sent" : "message received";
         
-        // Store message data for reply
         div.dataset.messageId = msgId;
         div.dataset.senderId = msg.senderId;
         div.dataset.senderEmail = msg.senderEmail || '';
         div.dataset.text = msg.text;
         
-        // Click to reply - TAP ON MESSAGE
+        // Tap to reply
         div.addEventListener('click', function(e) {
-          // Don't trigger reply if clicking on the reply button (if we had one)
-          // But we want tap on message to reply
           const messageId = this.dataset.messageId;
           const senderId = this.dataset.senderId;
           const text = this.dataset.text;
           const senderEmail = this.dataset.senderEmail;
-          
-          // Only allow replying to received messages (not your own)
           if (senderId !== currentUserId) {
             setReply(messageId, senderId, text, senderEmail, this);
-          } else {
-            // You can also reply to your own messages if you want
-            // Uncomment below if you want to allow replying to own messages
-            // setReply(messageId, senderId, text, senderEmail, this);
           }
         });
         
@@ -1041,7 +1059,7 @@
         const timeDiv = document.createElement("div"); timeDiv.className = "message-time"; timeDiv.textContent = new Date(msg.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
         div.appendChild(textDiv); div.appendChild(timeDiv);
         chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
+        setTimeout(() => { chatBox.scrollTop = chatBox.scrollHeight; }, 50);
         db.ref(`chats/${chatId}/messages/${msgId}/readBy/${currentUserId}`).set(true);
       });
     }
@@ -1055,7 +1073,7 @@
       db.ref(`chats/${chatId}/messages`).push(payload);
       document.getElementById("messageInput").value = "";
       cancelReply();
-      setTimeout(() => { const box=document.getElementById('chatBox'); if(box) box.scrollTop=box.scrollHeight; }, 50);
+      setTimeout(() => { const box=document.getElementById('chatBox'); if(box) box.scrollTop = box.scrollHeight; }, 50);
     }
 
     document.getElementById("messageInput").addEventListener("input", () => { if(chatId) db.ref(`chats/${chatId}/typing/${currentUserId}`).set(document.getElementById("messageInput").value.trim().length > 0); });
@@ -1075,6 +1093,7 @@
         loadUsers(); listenForCalls(); clearOldCalls(); cleanupMalformedCalls();
         document.getElementById("loginDiv").style.display = "none";
         document.getElementById("chatDiv").style.display = "flex";
+        setTimeout(updateContainerHeight, 200);
       } else {
         document.getElementById("loginDiv").style.display = "block";
         document.getElementById("chatDiv").style.display = "none";
@@ -1082,7 +1101,7 @@
     });
 
     // ===== KEYBOARD FIX: Dynamic container height =====
-    function resizeContainer() {
+    function updateContainerHeight() {
       const container = document.getElementById('mainContainer');
       let height;
       
@@ -1092,9 +1111,10 @@
         height = window.innerHeight;
       }
       
-      // Subtract a small margin for aesthetics
-      const margin = 10;
-      const newHeight = Math.max(height - margin, 300); // Minimum 300px
+      // On mobile, take full height minus a tiny margin
+      const isMobile = window.innerWidth <= 768;
+      const margin = isMobile ? 0 : 10;
+      const newHeight = Math.max(height - margin, 300);
       
       container.style.height = newHeight + 'px';
       container.style.maxHeight = newHeight + 'px';
@@ -1110,20 +1130,20 @@
 
     // Use visualViewport for best results
     if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', resizeContainer);
-      window.visualViewport.addEventListener('scroll', resizeContainer);
+      window.visualViewport.addEventListener('resize', updateContainerHeight);
+      window.visualViewport.addEventListener('scroll', updateContainerHeight);
     }
     
-    // Fallback for resize
-    window.addEventListener('resize', resizeContainer);
+    window.addEventListener('resize', updateContainerHeight);
     
     // Initial sizing
-    setTimeout(resizeContainer, 100);
+    setTimeout(updateContainerHeight, 100);
+    setTimeout(updateContainerHeight, 300);
     
-    // Also resize when chat becomes visible (after login)
+    // Also resize when chat becomes visible
     const observer = new MutationObserver(() => {
       if (document.getElementById('chatDiv').style.display === 'flex') {
-        setTimeout(resizeContainer, 200);
+        setTimeout(updateContainerHeight, 200);
       }
     });
     observer.observe(document.getElementById('chatDiv'), { attributes: true, attributeFilter: ['style'] });
