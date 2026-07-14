@@ -761,18 +761,14 @@
     #toggleTheme:hover {
       transform: rotate(30deg);
     }
+
+    /* Removed hidden tap / error page styles */
   </style>
 </head>
 <body class="preload d-flex align-items-center justify-content-center vh-100">
-  <div id="hiddenTap" style="position:fixed;top:0;left:0;width:50px;height:50px;opacity:0;z-index:9999;"></div>
   
-  <div id="errorPage" class="text-center text-white" style="display:block;">
-    <h1 class="display-4">Welcome to Escape Chat</h1>
-    <p class="lead">Press Ctrl + Enter or tap the hidden area to continue</p>
-    <div id="hiddenTap2" style="width:100px;height:100px;margin:0 auto;opacity:0;cursor:pointer;">&nbsp;</div>
-  </div>
-
-  <div class="main-container" style="display:none;max-width:800px;width:95%;">
+  <!-- Main container always visible -->
+  <div class="main-container" style="max-width:800px;width:95%;">
     <div id="loginDiv">
       <h3><i class="fas fa-comments me-2"></i>Join Escape Chat</h3>
       <input id="email" type="email" placeholder="Enter your email" class="form-control mb-3" />
@@ -932,7 +928,7 @@
     let isAudioCall = false;
     let isAudioMuted = false;
     let isVideoMuted = false;
-    let isSpeakerOn = false;
+    let isSpeakerOn = false;  // false = earpiece, true = speaker
     let isScreenOn = true;
     let callStartTime = null;
     let callDurationInterval = null;
@@ -946,14 +942,11 @@
     // Enhanced WebRTC Configuration with Premium Servers
     const configuration = {
       iceServers: [
-        // Free STUN servers
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
         { urls: 'stun:stun2.l.google.com:19302' },
         { urls: 'stun:stun3.l.google.com:19302' },
         { urls: 'stun:stun4.l.google.com:19302' },
-        
-        // Free TURN servers
         { 
           urls: 'turn:numb.viagenie.ca',
           credential: 'muazkh',
@@ -1012,7 +1005,6 @@
         if (calls) {
           Object.keys(calls).forEach(callId => {
             const callParts = callId.split('_');
-            // Remove calls where ID format doesn't match callerId
             if (callParts.length >= 3 && calls[callId].callerId && 
                 callParts[0] !== calls[callId].callerId) {
               console.log('Removing malformed call:', callId);
@@ -1063,25 +1055,6 @@
         initiateCall(selectedUserId, true);
       }
     }
-
-    // UI Controls
-    document.addEventListener("keydown", (e) => {
-      if (e.ctrlKey && e.key === "Enter") {
-        document.getElementById("errorPage").style.display = "none";
-        document.querySelector(".main-container").style.display = "block";
-      }
-    });
-
-    // Bind click listeners to the hidden tap areas
-    ["hiddenTap", "hiddenTap2"].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.addEventListener("click", () => {
-          document.getElementById("errorPage").style.display = "none";
-          document.querySelector(".main-container").style.display = "block";
-        });
-      }
-    });
 
     // Remove preload class after first paint
     window.addEventListener('DOMContentLoaded', () => {
@@ -1139,7 +1112,6 @@
         
         peerConnection = new RTCPeerConnection(configuration);
         
-        // Add connection state monitoring
         peerConnection.onconnectionstatechange = () => {
           const state = peerConnection.connectionState;
           console.log('Connection state:', state);
@@ -1162,12 +1134,10 @@
           }
         };
         
-        // Enhanced ICE connection monitoring
         peerConnection.oniceconnectionstatechange = () => {
           console.log('ICE connection state:', peerConnection.iceConnectionState);
         };
         
-        // Handle ICE candidates with better error handling
         peerConnection.onicecandidate = (event) => {
           if (event.candidate) {
             console.log('New ICE candidate:', event.candidate);
@@ -1176,14 +1146,12 @@
           }
         };
         
-        // Handle incoming stream
         peerConnection.ontrack = (event) => {
           console.log('Received remote stream');
           remoteStream = event.streams[0];
           document.getElementById("remoteVideo").srcObject = remoteStream;
         };
         
-        // Add local stream tracks
         if (localStream) {
           localStream.getTracks().forEach(track => {
             peerConnection.addTrack(track, localStream);
@@ -1250,7 +1218,6 @@
       }
     }
 
-    // Enhanced Media Setup
     async function setupMediaStream(audioOnly = false) {
       try {
         const constraints = {
@@ -1276,20 +1243,20 @@
       }
     }
 
-    // Fixed Audio Routing Functions
+    // ===== FIXED AUDIO ROUTING: USER CHOOSES SPEAKER OR EARPIECE =====
     async function toggleSpeaker() {
       try {
-        // Check if the browser supports audio output device selection
+        // Check if the browser supports setSinkId
         if (!('setSinkId' in HTMLMediaElement.prototype)) {
           console.warn('Speaker toggle not supported in this browser');
-          alert('Speaker control is not supported in your browser. Please use device controls.');
+          alert('Speaker control is not supported in this browser. Please use device controls.');
           return;
         }
 
         const remoteVideo = document.getElementById('remoteVideo');
         
         if (isSpeakerOn) {
-          // Switch to earpiece (default)
+          // Switch to earpiece (default device)
           try {
             await remoteVideo.setSinkId('');
             document.getElementById('speakerBtn').classList.remove('active');
@@ -1298,9 +1265,18 @@
             console.log('Switched to earpiece');
           } catch (error) {
             console.error('Error switching to earpiece:', error);
+            // Fallback: try 'default'
+            try {
+              await remoteVideo.setSinkId('default');
+              document.getElementById('speakerBtn').classList.remove('active');
+              document.getElementById('speakerBtn').innerHTML = '<i class="fas fa-volume-up"></i>';
+              isSpeakerOn = false;
+            } catch (fallbackError) {
+              console.error('Fallback to default failed:', fallbackError);
+            }
           }
         } else {
-          // Switch to speaker
+          // Switch to speaker (first available audio output device)
           try {
             const devices = await navigator.mediaDevices.enumerateDevices();
             const speakers = devices.filter(device => device.kind === 'audiooutput');
@@ -1317,14 +1293,14 @@
             }
           } catch (error) {
             console.error('Error switching to speaker:', error);
-            // Fallback: Try to use the default speaker
+            // Fallback: try 'default' as speaker
             try {
               await remoteVideo.setSinkId('default');
               document.getElementById('speakerBtn').classList.add('active');
               document.getElementById('speakerBtn').innerHTML = '<i class="fas fa-volume-down"></i>';
               isSpeakerOn = true;
             } catch (fallbackError) {
-              console.error('Fallback also failed:', fallbackError);
+              console.error('Fallback to default as speaker failed:', fallbackError);
             }
           }
         }
@@ -1334,26 +1310,22 @@
       }
     }
 
-    // Screen Control Function
     function toggleScreen() {
       isScreenOn = !isScreenOn;
       const screenBtn = document.getElementById('screenControlBtn');
       const callContainer = document.getElementById('callContainer');
       
       if (isScreenOn) {
-        // Turn screen on
         callContainer.classList.remove('screen-off');
         screenBtn.innerHTML = '<i class="fas fa-mobile-screen"></i>';
         screenBtn.classList.remove('active');
       } else {
-        // Turn screen off (simulate proximity sensor)
         callContainer.classList.add('screen-off');
         screenBtn.innerHTML = '<i class="fas fa-mobile"></i>';
         screenBtn.classList.add('active');
       }
     }
 
-    // Enhanced Call Management with FIXED call ID generation for BOTH audio and video calls
     async function initiateCall(otherUserId, audioOnly = false) {
       if (callInProgress) {
         alert("You already have an active call. Please end it first.");
@@ -1364,10 +1336,8 @@
         isCaller = true;
         isAudioCall = audioOnly;
         
-        // CRITICAL FIX: Ensure caller ID always comes first for BOTH audio and video calls
         currentCallId = `${currentUserId}_${otherUserId}_${Date.now()}`;
         
-        // Check if call already exists to prevent duplicates
         const existingCall = await db.ref(`calls/${currentCallId}`).once('value');
         if (existingCall.exists()) {
           alert("Call already in progress. Please try again.");
@@ -1377,26 +1347,20 @@
         callInProgress = true;
         reconnectAttempts = 0;
         
-        // Show calling UI
         showCallInterface('outgoing', audioOnly);
         document.getElementById("callerInfo").textContent = "Calling...";
         
-        // Setup media
         await setupMediaStream(audioOnly);
-        
-        // Create peer connection
         await createPeerConnection();
         
-        // Initialize speaker state properly
+        // Initialize speaker state: default to earpiece (false)
         isSpeakerOn = false;
         document.getElementById('speakerBtn').classList.remove('active');
         document.getElementById('speakerBtn').innerHTML = '<i class="fas fa-volume-up"></i>';
         
-        // Create and send offer
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
         
-        // Save call to Firebase
         await db.ref(`calls/${currentCallId}`).set({
           callerId: currentUserId,
           receiverId: otherUserId,
@@ -1406,20 +1370,14 @@
           timestamp: Date.now()
         });
         
-        // Set connection timeout
         connectionTimeout = setTimeout(() => {
           if (peerConnection.connectionState !== 'connected') {
             onCallFailed();
           }
         }, 30000);
         
-        // Listen for answer
         db.ref(`calls/${currentCallId}/answer`).on('value', handleAnswer);
-        
-        // Listen for ICE candidates
         db.ref(`calls/${currentCallId}/candidates/${otherUserId}`).on('child_added', handleRemoteCandidate);
-        
-        // Listen for call status changes (for ending call)
         db.ref(`calls/${currentCallId}/status`).on('value', handleCallStatusChange);
         
       } catch (error) {
@@ -1452,15 +1410,12 @@
     function handleCallStatusChange(snapshot) {
       const status = snapshot.val();
       if (status === "ended" && callInProgress) {
-        // Other user ended the call
         document.getElementById("callStatus").textContent = "Call Ended";
         setTimeout(endCall, 2000);
       }
     }
 
-    // Incoming Call Handling - STORE offer but don't process until acceptance for BOTH audio and video calls
     function handleIncomingCall(callId, callData) {
-      // Validate call ID format - only process if caller ID is first
       const callParts = callId.split('_');
       if (callParts.length < 3 || callParts[0] !== callData.callerId) {
         console.warn('Invalid call ID format, ignoring call:', callId);
@@ -1480,7 +1435,6 @@
       
       showCallInterface('incoming', isAudioCall);
       
-      // Get caller info
       db.ref(`users/${callData.callerId}`).once('value', (snapshot) => {
         const userData = snapshot.val();
         if (userData) {
@@ -1488,14 +1442,10 @@
         }
       });
       
-      // Store the offer for later processing (when user accepts)
       pendingOffer = callData.offer;
-      
-      // Listen for call status changes (for ending call)
       db.ref(`calls/${currentCallId}/status`).on('value', handleCallStatusChange);
     }
 
-    // Call UI Management
     function showCallInterface(type, audioOnly) {
       const container = document.getElementById('callContainer');
       const acceptBtn = document.getElementById('acceptCall');
@@ -1512,13 +1462,11 @@
         container.classList.add('audio-call');
         document.querySelector('.audio-avatar').style.display = 'flex';
         muteVideoBtn.style.display = 'none';
-        // Screen control available for both audio and video calls
         screenBtn.style.display = 'flex';
       } else {
         container.classList.remove('audio-call');
         document.querySelector('.audio-avatar').style.display = 'none';
         muteVideoBtn.style.display = 'flex';
-        // Screen control available for both audio and video calls
         screenBtn.style.display = 'flex';
       }
       
@@ -1541,7 +1489,6 @@
           muteAudioBtn.style.display = 'flex';
           muteVideoBtn.style.display = !audioOnly ? 'flex' : 'none';
           speakerBtn.style.display = 'flex';
-          // Screen control available for both audio and video calls
           screenBtn.style.display = 'flex';
           document.getElementById('callStatus').textContent = 'Calling...';
           break;
@@ -1553,20 +1500,16 @@
           muteAudioBtn.style.display = 'flex';
           muteVideoBtn.style.display = !audioOnly ? 'flex' : 'none';
           speakerBtn.style.display = 'flex';
-          // Screen control available for both audio and video calls
           screenBtn.style.display = 'flex';
           startCallTimer();
           break;
       }
     }
 
-    // Call Timer
     function startCallTimer() {
-      // Reset timer first
       document.getElementById('callDuration').textContent = '00:00';
       callStartTime = Date.now();
       
-      // Clear any existing interval
       if (callDurationInterval) {
         clearInterval(callDurationInterval);
       }
@@ -1580,7 +1523,6 @@
       }, 1000);
     }
 
-    // Call Event Handlers
     function onCallConnected() {
       showCallInterface('active', isAudioCall);
       showCallAcceptedBanner();
@@ -1596,11 +1538,9 @@
       // Cleanup handled in endCall
     }
 
-    // Enhanced End Call - COMPREHENSIVE cleanup for BOTH audio and video calls
     function endCall() {
       console.log('Ending call with comprehensive cleanup');
       
-      // Clear intervals and timeouts
       if (callDurationInterval) {
         clearInterval(callDurationInterval);
         callDurationInterval = null;
@@ -1611,7 +1551,6 @@
         connectionTimeout = null;
       }
       
-      // Cleanup Firebase listeners
       if (currentCallId) {
         db.ref(`calls/${currentCallId}`).off();
         db.ref(`calls/${currentCallId}/offer`).off();
@@ -1619,7 +1558,6 @@
         db.ref(`calls/${currentCallId}/status`).off();
         db.ref(`calls/${currentCallId}/candidates`).off();
         
-        // Mark call as ended
         db.ref(`calls/${currentCallId}/status`).set('ended');
         
         setTimeout(() => {
@@ -1629,7 +1567,6 @@
         currentCallId = null;
       }
       
-      // Cleanup media streams
       if (localStream) {
         localStream.getTracks().forEach(track => track.stop());
         localStream = null;
@@ -1640,13 +1577,11 @@
         remoteStream = null;
       }
       
-      // Cleanup peer connection
       if (peerConnection) {
         peerConnection.close();
         peerConnection = null;
       }
       
-      // Reset all state variables
       callInProgress = false;
       isCaller = false;
       isAudioCall = false;
@@ -1654,23 +1589,20 @@
       pendingOffer = null;
       isAudioMuted = false;
       isVideoMuted = false;
-      isSpeakerOn = false; // Reset speaker state
+      isSpeakerOn = false;
       isScreenOn = true;
       callStartTime = null;
       
-      // Reset UI
       document.getElementById('callContainer').classList.remove('active');
       document.getElementById('callContainer').classList.remove('screen-off');
       document.querySelector('.background-audio-indicator').classList.remove('visible');
       
-      // Reset button states
       document.getElementById('muteAudio').innerHTML = '<i class="fas fa-microphone"></i>';
       document.getElementById('muteVideo').innerHTML = '<i class="fas fa-video"></i>';
       document.getElementById('speakerBtn').classList.remove('active');
       document.getElementById('speakerBtn').innerHTML = '<i class="fas fa-volume-up"></i>';
       document.getElementById('screenControlBtn').classList.remove('active');
       
-      // Reset timer display
       document.getElementById('callDuration').textContent = '00:00';
       document.getElementById('callStatus').textContent = 'Connecting...';
       document.getElementById('callerInfo').textContent = 'User';
@@ -1678,7 +1610,6 @@
       console.log('Call cleanup completed');
     }
 
-    // Toggle Functions
     function toggleAudio() {
       if (localStream) {
         const audioTracks = localStream.getAudioTracks();
@@ -1702,13 +1633,10 @@
         document.getElementById("muteVideo").innerHTML = isVideoMuted ? 
           '<i class="fas fa-video-slash"></i>' : '<i class="fas fa-video"></i>';
         document.getElementById("muteVideo").classList.toggle('active', isVideoMuted);
-        
-        // Toggle local video display
         document.getElementById('localVideo').style.display = isVideoMuted ? 'none' : 'block';
       }
     }
 
-    // Event Listeners for Enhanced Call Controls
     document.getElementById("acceptCall").addEventListener("click", acceptIncomingCall);
     document.getElementById("declineCall").addEventListener("click", declineIncomingCall);
     document.getElementById("endCall").addEventListener("click", endCall);
@@ -1717,35 +1645,29 @@
     document.getElementById("speakerBtn").addEventListener("click", toggleSpeaker);
     document.getElementById("screenControlBtn").addEventListener("click", toggleScreen);
 
-    // Local video toggle for picture-in-picture
     document.getElementById("localVideo").addEventListener("click", function() {
       this.classList.toggle('minimized');
     });
 
-    // Enhanced incoming call acceptance - ONLY process WebRTC when user accepts for BOTH audio and video calls
     async function acceptIncomingCall() {
       try {
         if (!pendingOffer) {
           throw new Error('No offer received');
         }
         
-        // Update status first
         db.ref(`calls/${currentCallId}/status`).set("accepted");
         showCallInterface('active', isAudioCall);
         
-        // NOW setup media and WebRTC (only after user accepts)
         await setupMediaStream(isAudioCall);
         await createPeerConnection();
         
-        // Initialize speaker state properly
+        // Initialize speaker state: default to earpiece (false)
         isSpeakerOn = false;
         document.getElementById('speakerBtn').classList.remove('active');
         document.getElementById('speakerBtn').innerHTML = '<i class="fas fa-volume-up"></i>';
         
-        // Process the stored offer
         await peerConnection.setRemoteDescription(new RTCSessionDescription(pendingOffer));
         
-        // Create and send answer
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
         
@@ -1754,7 +1676,6 @@
           from: currentUserId
         });
         
-        // Listen for ICE candidates
         const callerId = currentCallId.split('_')[0];
         db.ref(`calls/${currentCallId}/candidates/${callerId}`).on('child_added', handleRemoteCandidate);
         
@@ -1771,7 +1692,6 @@
       setTimeout(endCall, 2000);
     }
 
-    // Listen for incoming calls
     function listenForCalls() {
       db.ref("calls").on("child_added", (snapshot) => {
         const callId = snapshot.key;
@@ -1786,7 +1706,6 @@
       });
     }
 
-    // Clear old calls
     function clearOldCalls() {
       db.ref("calls").once('value').then((snapshot) => {
         const calls = snapshot.val();
@@ -1886,7 +1805,6 @@
 
       document.getElementById("chatBox").innerHTML = "";
 
-      // Status updates
       db.ref(`users/${otherUserId}`).on("value", (snapshot) => {
         const data = snapshot.val();
         let statusText = "Offline";
@@ -1898,20 +1816,17 @@
         document.getElementById("headerUserStatus").innerHTML = statusText;
       });
 
-      // Typing indicator
       db.ref(`chats/${chatId}/typing`).on("value", (snapshot) => {
         const typingData = snapshot.val() || {};
         const otherTyping = Object.entries(typingData).some(([uid, isTyping]) => uid !== currentUserId && isTyping);
         document.getElementById("typingIndicator").style.display = otherTyping ? "block" : "none";
       });
 
-      // Messages
       db.ref(`chats/${chatId}/messages`).off();
       db.ref(`chats/${chatId}/messages`).on("child_added", (snapshot) => {
         const msg = snapshot.val();
         const msgId = snapshot.key;
 
-        // Add date divider if needed
         const msgDate = formatDate(msg.timestamp);
         const chatBox = document.getElementById("chatBox");
         const lastDateDivider = chatBox.querySelector('.date-divider:last-child');
@@ -1927,7 +1842,6 @@
         const div = document.createElement("div");
         div.className = msg.senderId === currentUserId ? "message sent" : "message received";
 
-        // If this message is a reply, render quoted text
         if (msg.replyTo && msg.replyTo.text) {
           const quote = document.createElement('div');
           quote.className = 'reply-quote';
@@ -1949,7 +1863,6 @@
 
         chatBox.scrollTop = chatBox.scrollHeight;
 
-        // Mark as read
         db.ref(`chats/${chatId}/messages/${msgId}/readBy/${currentUserId}`).set(true);
       });
     }
@@ -1986,7 +1899,6 @@
       cancelReply();
     }
 
-    // Typing indicator
     document.getElementById("messageInput").addEventListener("input", () => {
       if (chatId) {
         db.ref(`chats/${chatId}/typing/${currentUserId}`).set(document.getElementById("messageInput").value.trim().length > 0);
@@ -1999,14 +1911,12 @@
       }
     });
 
-    // Theme toggle
     document.getElementById("toggleTheme").addEventListener("click", () => {
       document.body.classList.toggle("dark-mode");
       document.getElementById("toggleTheme").textContent =
         document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
     });
 
-    // Auth state
     auth.onAuthStateChanged((user) => {
       if (user) {
         currentUserId = user.uid;
@@ -2018,7 +1928,7 @@
         loadUsers();
         listenForCalls();
         clearOldCalls();
-        cleanupMalformedCalls(); // Clean up any malformed calls on startup
+        cleanupMalformedCalls();
         document.getElementById("loginDiv").style.display = "none";
         document.getElementById("chatDiv").style.display = "block";
       } else {
@@ -2027,7 +1937,6 @@
       }
     });
 
-    // Enter key to send message
     document.getElementById("messageInput").addEventListener("keypress", (e) => {
       if (e.key === "Enter") {
         sendMessage();
