@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+  LinguaCast — Broadcast Your Voice Worldwide
+  © 2025 Your Name. All rights reserved.
+  Educational project. Not for commercial redistribution.
+
+  Single-file version: HTML + CSS + JS all in one.
+  Just save as .html and open in Chrome or Edge.
+  ============================================================
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="author" content="Your Name">
+<meta name="copyright" content="© 2025 LinguaCast. All rights reserved.">
+<title>LinguaCast — Broadcast Your Voice Worldwide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   LinguaCast — Broadcast Your Voice Worldwide
+   ============================================================ */
+:root {
+  --bg-primary: #06080f;
+  --bg-secondary: #0d1220;
+  --accent-1: #6366f1;
+  --accent-2: #8b5cf6;
+  --accent-3: #06b6d4;
+  --accent-4: #22d3ee;
+  --success: #10b981;
+  --danger: #ef4444;
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --glass: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glow-1: rgba(99, 102, 241, 0.5);
+  --glow-3: rgba(6, 182, 212, 0.5);
+  --input-bg: rgba(0, 0, 0, 0.35);
+  --panel-bg: rgba(0, 0, 0, 0.3);
+}
+
+body.light {
+  --bg-primary: #eef2ff;
+  --bg-secondary: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --glass: rgba(255, 255, 255, 0.55);
+  --glass-border: rgba(15, 23, 42, 0.08);
+  --glow-1: rgba(99, 102, 241, 0.25);
+  --glow-3: rgba(6, 182, 212, 0.25);
+  --input-bg: rgba(255, 255, 255, 0.9);
+  --panel-bg: rgba(255, 255, 255, 0.7);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { min-height: 100%; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 30px 20px;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.45s ease, color 0.45s ease;
+}
+
+body.light {
+  background: linear-gradient(135deg, #eef2ff 0%, #e0f2fe 50%, #f0f9ff 100%);
+}
+
+.app, .panel, .options-bar, .lang-selector select, .swap-btn,
+.history-panel, .history-item, .theme-toggle, .action-btn.history,
+.copy-btn, .close-btn, .footer, .toggle-label::before {
+  transition: background 0.4s ease, border-color 0.4s ease,
+              color 0.4s ease, box-shadow 0.4s ease, transform 0.3s ease;
+}
+
+/* ---------- Background ---------- */
+.bg-orbs {
+  position: fixed; inset: 0;
+  z-index: 0; overflow: hidden; pointer-events: none;
+}
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.35;
+  animation: float 22s infinite ease-in-out;
+  transition: opacity 0.5s ease;
+}
+.orb-1 { width: 500px; height: 500px; background: var(--accent-1); top: -180px; left: -180px; }
+.orb-2 { width: 450px; height: 450px; background: var(--accent-2); bottom: -150px; right: -150px; animation-delay: -7s; }
+.orb-3 { width: 400px; height: 400px; background: var(--accent-3); top: 45%; left: 55%; animation-delay: -14s; }
+.orb-4 { width: 350px; height: 350px; background: var(--accent-4); top: 20%; right: 10%; animation-delay: -4s; }
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%      { transform: translate(40px, -40px) scale(1.15); }
+  66%      { transform: translate(-30px, 30px) scale(0.9); }
+}
+
+.grid-overlay {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(99, 102, 241, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+}
+body.light .grid-overlay {
+  background-image:
+    linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
+}
+
+/* ---------- App Card ---------- */
+.app {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 880px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  backdrop-filter: blur(28px) saturate(140%);
+  -webkit-backdrop-filter: blur(28px) saturate(140%);
+  border: 1px solid var(--glass-border);
+  border-radius: 30px;
+  padding: 34px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6),
+              inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+body.light .app {
+  background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+  box-shadow: 0 30px 90px rgba(15, 23, 42, 0.1),
+              inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* ---------- Header ---------- */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.logo { display: flex; align-items: center; gap: 14px; }
+
+.logo-mark {
+  font-size: 2rem;
+  width: 52px; height: 52px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-3));
+  box-shadow: 0 8px 30px var(--glow-1);
+}
+
+.logo h1 {
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: -0.6px;
+  line-height: 1.1;
+}
+
+.logo h1 span {
+  background: linear-gradient(135deg, var(--accent-3), var(--accent-4));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tagline {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 3px;
+  font-weight: 500;
+}
+
+.header-actions { display: flex; align-items: center; gap: 12px; }
+
+/* ---------- Theme Toggle ---------- */
+.theme-toggle {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--input-bg);
+  cursor: pointer;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.theme-toggle:hover {
+  transform: scale(1.08);
+  border-color: var(--accent-1);
+  box-shadow: 0 0 20px var(--glow-1);
+}
+
+.theme-icon {
+  position: absolute;
+  font-size: 1.15rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.theme-icon.sun { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+.theme-icon.moon { opacity: 1; transform: rotate(0) scale(1); }
+body.light .theme-icon.sun { opacity: 1; transform: rotate(0) scale(1); }
+body.light .theme-icon.moon { opacity: 0; transform: rotate(90deg) scale(0.5); }
+
+/* ---------- Connection Badge ---------- */
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 18px;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: var(--success);
+  transition: all 0.35s;
+}
+.status-badge.offline {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: var(--danger);
+}
+.status-badge .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 12px currentColor;
+  animation: pulse-dot 2s infinite;
+}
+.status-badge.offline .dot { animation: none; }
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.7); }
+}
+
+/* ---------- Language Row ---------- */
+.lang-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.lang-selector { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+.lang-selector label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+}
+
+.lang-selector select {
+  padding: 14px 18px;
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: inherit;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 18px center;
+  padding-right: 44px;
+}
+.lang-selector select:focus {
+  border-color: var(--accent-1);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+.lang-selector select option {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.swap-btn {
+  width: 52px; height: 52px;
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  background: var(--input-bg);
+  color: var(--accent-3);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 2px;
+  flex-shrink: 0;
+}
+.swap-btn:hover {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  color: white;
+  border-color: transparent;
+  transform: rotate(180deg) scale(1.05);
+  box-shadow: 0 8px 26px var(--glow-1);
+}
+
+/* ---------- Mic ---------- */
+.mic-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 32px 0;
+  position: relative;
+}
+
+#visualizer {
+  position: absolute;
+  top: 5px; left: 50%;
+  transform: translateX(-50%);
+  opacity: 0.85;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mic-btn {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  color: white;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 12px 45px var(--glow-1),
+              inset 0 2px 0 rgba(255, 255, 255, 0.25);
+  position: relative;
+  z-index: 2;
+}
+.mic-btn::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(99, 102, 241, 0.35);
+  animation: ring 2.4s infinite;
+}
+.mic-btn:hover { transform: scale(1.06); }
+.mic-btn:active { transform: scale(0.97); }
+
+.mic-btn.listening {
+  background: linear-gradient(135deg, var(--accent-3), var(--success));
+  box-shadow: 0 12px 45px var(--glow-3),
+              inset 0 2px 0 rgba(255, 255, 255, 0.25);
+  animation: mic-pulse 1.5s infinite;
+}
+.mic-btn.listening::before { border-color: rgba(6, 182, 212, 0.5); }
+
+.mic-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.65), 0 12px 45px var(--glow-3); }
+  50%      { box-shadow: 0 0 0 28px rgba(6, 182, 212, 0), 0 12px 45px var(--glow-3); }
+}
+@keyframes ring {
+  0%   { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+.mic-status {
+  margin-top: 22px;
+  font-size: 0.87rem;
+  color: var(--text-secondary);
+  text-align: center;
+  min-height: 22px;
+  font-weight: 500;
+}
+
+/* ---------- Options Bar ---------- */
+.options-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 26px;
+  padding: 18px 22px;
+  background: var(--panel-bg);
+  border-radius: 18px;
+  border: 1px solid var(--glass-border);
+}
+
+.toggle-option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.85rem;
+  user-select: none;
+}
+.toggle-option input { display: none; }
+
+.toggle-label {
+  position: relative;
+  padding-left: 52px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.toggle-label::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 42px; height: 24px;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border);
+}
+body.light .toggle-label::before { background: rgba(15, 23, 42, 0.12); }
+
+.toggle-label::after {
+  content: '';
+  position: absolute;
+  left: 3px; top: 50%;
+  transform: translateY(-50%);
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+.toggle-option input:checked + .toggle-label { color: var(--text-primary); }
+.toggle-option input:checked + .toggle-label::before {
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  border-color: transparent;
+  box-shadow: 0 0 18px var(--glow-1);
+}
+.toggle-option input:checked + .toggle-label::after {
+  transform: translateY(-50%) translateX(18px);
+}
+
+.speed-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-left: auto;
+}
+.speed-control input[type="range"] {
+  width: 110px;
+  accent-color: var(--accent-3);
+  cursor: pointer;
+}
+#speedValue {
+  min-width: 42px;
+  font-weight: 700;
+  color: var(--accent-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Panels ---------- */
+.panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.panel {
+  background: var(--panel-bg);
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid var(--glass-border);
+}
+.panel:hover { border-color: rgba(99, 102, 241, 0.25); }
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.panel h2 {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.copy-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+body.light .copy-btn { background: rgba(15, 23, 42, 0.05); }
+.copy-btn:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: var(--accent-1);
+  transform: translateY(-1px);
+}
+
+.text-box {
+  min-height: 110px;
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: var(--text-primary);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.text-box:empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-muted);
+  opacity: 0.55;
+  font-style: italic;
+}
+body.light .text-box:empty::before { opacity: 0.7; }
+
+/* ---------- Actions ---------- */
+.actions { display: flex; gap: 12px; }
+
+.action-btn {
+  flex: 1;
+  padding: 16px;
+  border: none;
+  border-radius: 16px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  gap: 9px;
+  position: relative;
+}
+.action-btn.play {
+  background: linear-gradient(135deg, var(--accent-3), var(--success));
+  color: white;
+  box-shadow: 0 8px 24px rgba(6, 182, 212, 0.3);
+}
+.action-btn.play:disabled {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+body.light .action-btn.play:disabled { background: rgba(15, 23, 42, 0.06); }
+
+.action-btn.history {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-primary);
+  border: 1px solid var(--glass-border);
+}
+body.light .action-btn.history { background: rgba(15, 23, 42, 0.06); }
+
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.action-btn.small { padding: 11px; font-size: 0.82rem; }
+.action-btn.danger {
+  background: rgba(239, 68, 68, 0.14);
+  color: var(--danger);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.badge {
+  background: var(--accent-1);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 50px;
+  min-width: 22px;
+  text-align: center;
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  margin-top: 28px;
+  padding-top: 22px;
+  border-top: 1px solid var(--glass-border);
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+}
+.footer p { margin: 0; }
+.footer-sub {
+  margin-top: 6px !important;
+  font-size: 0.68rem;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+/* ---------- History Drawer ---------- */
+.history-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 100;
+  display: flex; justify-content: flex-end;
+  opacity: 0;
+  pointer-events: none;
+}
+body.light .history-overlay { background: rgba(15, 23, 42, 0.4); }
+.history-overlay.open { opacity: 1; pointer-events: all; }
+
+.history-panel {
+  width: 100%;
+  max-width: 440px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--bg-secondary), var(--bg-primary));
+  border-left: 1px solid var(--glass-border);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+body.light .history-panel { background: linear-gradient(180deg, #ffffff, #f8fafc); }
+.history-overlay.open .history-panel { transform: translateX(0); }
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.history-header h2 { font-size: 1.15rem; font-weight: 700; }
+
+.close-btn {
+  width: 38px; height: 38px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 1rem;
+}
+body.light .close-btn { background: rgba(15, 23, 42, 0.05); }
+.close-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.history-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-right: 6px;
+}
+.history-list::-webkit-scrollbar { width: 6px; }
+.history-list::-webkit-scrollbar-track { background: transparent; }
+.history-list::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.4);
+  border-radius: 10px;
+}
+
+.history-item {
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 14px;
+  padding: 15px;
+  border: 1px solid var(--glass-border);
+  font-size: 0.87rem;
+  animation: slideIn 0.3s ease;
+}
+body.light .history-item { background: rgba(255, 255, 255, 0.9); }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.history-item:hover {
+  border-color: rgba(99, 102, 241, 0.35);
+  transform: translateX(-2px);
+}
+.history-item .lang-pair {
+  font-size: 0.7rem;
+  color: var(--accent-3);
+  margin-bottom: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.history-item .original {
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  font-style: italic;
+  line-height: 1.45;
+}
+.history-item .translated {
+  color: var(--text-primary);
+  font-weight: 500;
+  line-height: 1.45;
+}
+.history-item .time {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+
+.empty-history {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 60px 20px;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.history-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--glass-border);
+}
+
+/* ---------- Toast ---------- */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+  color: white;
+  padding: 14px 26px;
+  border-radius: 50px;
+  font-size: 0.87rem;
+  font-weight: 600;
+  box-shadow: 0 12px 40px rgba(99, 102, 241, 0.5);
+  opacity: 0;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 200;
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 700px) {
+  body { padding: 16px 12px; }
+  .app { padding: 22px; border-radius: 22px; }
+  .header { flex-direction: column; align-items: flex-start; }
+  .header-actions { width: 100%; justify-content: space-between; }
+  .lang-row { flex-wrap: wrap; }
+  .lang-selector { flex: 1 1 100%; }
+  .swap-btn { width: 100%; height: 46px; transform: rotate(90deg); }
+  .swap-btn:hover { transform: rotate(270deg) scale(1.05); }
+  .panels { grid-template-columns: 1fr; }
+  .options-bar { flex-direction: column; align-items: stretch; gap: 14px; }
+  .speed-control { margin-left: 0; justify-content: space-between; }
+  .actions { flex-direction: column; }
+  .history-panel { max-width: 100%; }
+  .mic-btn { width: 88px; height: 88px; }
+  #visualizer { width: 260px; }
+}
+@media (max-width: 400px) {
+  .logo h1 { font-size: 1.3rem; }
+  .logo-mark { width: 44px; height: 44px; font-size: 1.6rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="orb orb-4"></div>
+  <div class="grid-overlay"></div>
+</div>
+
+<div class="app">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-mark">📢</div>
+      <div>
+        <h1>Lingua<span>Cast</span></h1>
+        <p class="tagline">Broadcast your voice worldwide</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="theme-toggle" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">
+        <span class="theme-icon sun">☀️</span>
+        <span class="theme-icon moon">🌙</span>
+      </button>
+
+      <div class="status-badge" id="connectionStatus">
+        <span class="dot"></span>
+        <span id="statusText">Checking...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Language Row -->
+  <div class="lang-row">
+    <div class="lang-selector">
+      <label>FROM</label>
+      <select id="sourceLang">
+        <option value="en-US" selected>🇺🇸 English</option>
+        <option value="hi-IN">🇮🇳 Hindi</option>
+        <option value="ta-IN">🇮🇳 Tamil</option>
+        <option value="te-IN">🇮🇳 Telugu</option>
+        <option value="bn-IN">🇮🇳 Bengali</option>
+        <option value="ml-IN">🇮🇳 Malayalam</option>
+        <option value="mr-IN">🇮🇳 Marathi</option>
+        <option value="gu-IN">🇮🇳 Gujarati</option>
+        <option value="kn-IN">🇮🇳 Kannada</option>
+        <option value="pa-IN">🇮🇳 Punjabi</option>
+        <option value="ur-PK">🇵🇰 Urdu</option>
+        <option value="es-ES">🇪🇸 Spanish</option>
+        <option value="fr-FR">🇫🇷 French</option>
+        <option value="de-DE">🇩🇪 German</option>
+        <option value="it-IT">🇮🇹 Italian</option>
+        <option value="pt-BR">🇧🇷 Portuguese</option>
+        <option value="ru-RU">🇷🇺 Russian</option>
+        <option value="nl-NL">🇳🇱 Dutch</option>
+        <option value="tr-TR">🇹🇷 Turkish</option>
+        <option value="pl-PL">🇵🇱 Polish</option>
+        <option value="sv-SE">🇸🇪 Swedish</option>
+        <option value="ja-JP">🇯🇵 Japanese</option>
+        <option value="ko-KR">🇰🇷 Korean</option>
+        <option value="zh-CN">🇨🇳 Chinese</option>
+        <option value="th-TH">🇹🇭 Thai</option>
+        <option value="vi-VN">🇻🇳 Vietnamese</option>
+        <option value="id-ID">🇮🇩 Indonesian</option>
+        <option value="ar-SA">🇸🇦 Arabic</option>
+        <option value="he-IL">🇮🇱 Hebrew</option>
+        <option value="fa-IR">🇮🇷 Persian</option>
+      </select>
+    </div>
+
+    <button class="swap-btn" id="swapBtn" title="Swap languages">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M7 16V4m0 0L3 8m4-4l4 4"/>
+        <path d="M17 8v12m0 0l4-4m-4 4l-4-4"/>
+      </svg>
+    </button>
+
+    <div class="lang-selector">
+      <label>TO</label>
+      <select id="targetLang">
+        <option value="hi-IN" selected>🇮🇳 Hindi</option>
+        <option value="en-US">🇺🇸 English</option>
+        <option value="ta-IN">🇮🇳 Tamil</option>
+        <option value="te-IN">🇮🇳 Telugu</option>
+        <option value="bn-IN">🇮🇳 Bengali</option>
+        <option value="ml-IN">🇮🇳 Malayalam</option>
+        <option value="mr-IN">🇮🇳 Marathi</option>
+        <option value="gu-IN">🇮🇳 Gujarati</option>
+        <option value="kn-IN">🇮🇳 Kannada</option>
+        <option value="pa-IN">🇮🇳 Punjabi</option>
+        <option value="ur-PK">🇵🇰 Urdu</option>
+        <option value="es-ES">🇪🇸 Spanish</option>
+        <option value="fr-FR">🇫🇷 French</option>
+        <option value="de-DE">🇩🇪 German</option>
+        <option value="it-IT">🇮🇹 Italian</option>
+        <option value="pt-BR">🇧🇷 Portuguese</option>
+        <option value="ru-RU">🇷🇺 Russian</option>
+        <option value="nl-NL">🇳🇱 Dutch</option>
+        <option value="tr-TR">🇹🇷 Turkish</option>
+        <option value="pl-PL">🇵🇱 Polish</option>
+        <option value="sv-SE">🇸🇪 Swedish</option>
+        <option value="ja-JP">🇯🇵 Japanese</option>
+        <option value="ko-KR">🇰🇷 Korean</option>
+        <option value="zh-CN">🇨🇳 Chinese</option>
+        <option value="th-TH">🇹🇭 Thai</option>
+        <option value="vi-VN">🇻🇳 Vietnamese</option>
+        <option value="id-ID">🇮🇩 Indonesian</option>
+        <option value="ar-SA">🇸🇦 Arabic</option>
+        <option value="he-IL">🇮🇱 Hebrew</option>
+        <option value="fa-IR">🇮🇷 Persian</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Mic + Visualizer -->
+  <div class="mic-container">
+    <canvas id="visualizer" width="360" height="70"></canvas>
+    <button id="micBtn" class="mic-btn" aria-label="Start listening">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+        <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+      </svg>
+    </button>
+    <p class="mic-status" id="micStatus">Tap the mic to begin</p>
+  </div>
+
+  <!-- Options Bar -->
+  <div class="options-bar">
+    <label class="toggle-option">
+      <input type="checkbox" id="autoPlayToggle" checked>
+      <span class="toggle-label">Auto-play translation</span>
+    </label>
+
+    <label class="toggle-option">
+      <input type="checkbox" id="echoGuardToggle" checked>
+      <span class="toggle-label">Echo guard</span>
+    </label>
+
+    <div class="speed-control">
+      <label for="speedRange">Speed</label>
+      <input type="range" id="speedRange" min="0.5" max="1.5" step="0.1" value="1">
+      <span id="speedValue">1.0×</span>
+    </div>
+  </div>
+
+  <!-- Panels -->
+  <div class="panels">
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Original</h2>
+        <button class="copy-btn" id="copyOriginal" title="Copy original">📋</button>
+      </div>
+      <p id="originalText" class="text-box" data-placeholder="Your speech appears here..."></p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Translation</h2>
+        <button class="copy-btn" id="copyTranslation" title="Copy translation">📋</button>
+      </div>
+      <p id="translatedText" class="text-box" data-placeholder="Translation appears here..."></p>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <button id="playBtn" class="action-btn play" disabled>
+      <span>🔊</span> Play Translation
+    </button>
+    <button id="historyBtn" class="action-btn history">
+      <span>📜</span> History
+      <span class="badge" id="historyBadge">0</span>
+    </button>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; <span id="year"></span> LinguaCast. All rights reserved.</p>
+    <p class="footer-sub">Broadcast your voice worldwide</p>
+  </footer>
+
+</div>
+
+<!-- History Drawer -->
+<div class="history-overlay" id="historyOverlay">
+  <div class="history-panel">
+    <div class="history-header">
+      <h2>📜 Translation History</h2>
+      <button class="close-btn" id="closeHistory">✕</button>
+    </div>
+
+    <div class="history-list" id="historyList">
+      <p class="empty-history">No translations yet.</p>
+    </div>
+
+    <div class="history-actions">
+      <button id="exportBtn" class="action-btn small">📥 Export JSON</button>
+      <button id="clearHistoryBtn" class="action-btn small danger">🗑️ Clear All</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   LinguaCast — Broadcast Your Voice Worldwide
+   Single-file version
+   ============================================================ */
+
+const micBtn           = document.getElementById('micBtn');
+const micStatus        = document.getElementById('micStatus');
+const originalText     = document.getElementById('originalText');
+const translatedText   = document.getElementById('translatedText');
+const sourceLang       = document.getElementById('sourceLang');
+const targetLang       = document.getElementById('targetLang');
+const swapBtn          = document.getElementById('swapBtn');
+const playBtn          = document.getElementById('playBtn');
+const copyOriginal     = document.getElementById('copyOriginal');
+const copyTranslation  = document.getElementById('copyTranslation');
+const autoPlayToggle   = document.getElementById('autoPlayToggle');
+const echoGuardToggle  = document.getElementById('echoGuardToggle');
+const speedRange       = document.getElementById('speedRange');
+const speedValue       = document.getElementById('speedValue');
+const connectionStatus = document.getElementById('connectionStatus');
+const statusText       = document.getElementById('statusText');
+const historyBtn       = document.getElementById('historyBtn');
+const historyBadge     = document.getElementById('historyBadge');
+const historyOverlay   = document.getElementById('historyOverlay');
+const closeHistory     = document.getElementById('closeHistory');
+const historyList      = document.getElementById('historyList');
+const exportBtn        = document.getElementById('exportBtn');
+const clearHistoryBtn  = document.getElementById('clearHistoryBtn');
+const visualizer       = document.getElementById('visualizer');
+const vizCtx           = visualizer.getContext('2d');
+const toast            = document.getElementById('toast');
+const themeToggle      = document.getElementById('themeToggle');
+
+let recognition        = null;
+let isListening        = false;
+let finalTranscript    = '';
+let currentOriginal    = '';
+let currentTranslation = '';
+let agentSpeaking      = false;
+let cooldownTimer      = null;
+let debounceTimer      = null;
+const COOLDOWN_MS      = 1400;
+const DEBOUNCE_MS      = 600;
+
+let audioContext       = null;
+let analyser           = null;
+let micStream          = null;
+let vizAnimation       = null;
+
+const HISTORY_KEY = 'linguacast_history';
+const THEME_KEY   = 'linguacast_theme';
+const MAX_HISTORY = 100;
+
+/* ---------- Theme ---------- */
+function applyTheme(theme) {
+  if (theme === 'light') document.body.classList.add('light');
+  else document.body.classList.remove('light');
+}
+
+function initTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  if (saved) applyTheme(saved);
+  else {
+    const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+    applyTheme(prefersLight ? 'light' : 'dark');
+  }
+}
+
+themeToggle.addEventListener('click', () => {
+  const isLight = document.body.classList.toggle('light');
+  localStorage.setItem(THEME_KEY, isLight ? 'light' : 'dark');
+  showToast(isLight ? '☀️ Light mode' : '🌙 Dark mode');
+});
+
+window.matchMedia('(prefers-color-scheme: light)')
+  .addEventListener('change', (e) => {
+    if (!localStorage.getItem(THEME_KEY)) {
+      applyTheme(e.matches ? 'light' : 'dark');
+    }
+  });
+
+/* ---------- Internet Status ---------- */
+function updateConnectionStatus() {
+  if (navigator.onLine) {
+    connectionStatus.classList.remove('offline');
+    statusText.textContent = 'Connected';
+  } else {
+    connectionStatus.classList.add('offline');
+    statusText.textContent = 'Offline';
+  }
+}
+window.addEventListener('online',  updateConnectionStatus);
+window.addEventListener('offline', updateConnectionStatus);
+updateConnectionStatus();
+
+/* ---------- Toast ---------- */
+let toastTimer = null;
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+/* ---------- Speech Recognition ---------- */
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+if (!SpeechRecognition) {
+  micStatus.textContent = '❌ Speech Recognition not supported. Use Chrome or Edge.';
+  micBtn.disabled = true;
+}
+
+function createRecognition() {
+  const rec = new SpeechRecognition();
+  rec.continuous     = true;
+  rec.interimResults = true;
+  rec.lang           = sourceLang.value;
+
+  rec.onstart = () => {
+    isListening = true;
+    micBtn.classList.add('listening');
+    micStatus.textContent = '🎧 Listening… speak now';
+    startVisualizer();
+  };
+
+  rec.onresult = (event) => {
+    if (echoGuardToggle.checked && (agentSpeaking || cooldownTimer !== null)) return;
+
+    let interim = '';
+    let final   = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const t = event.results[i][0].transcript;
+      if (event.results[i].isFinal) final += t + ' ';
+      else interim += t;
+    }
+
+    if (final) {
+      finalTranscript += final;
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        translateText(finalTranscript.trim());
+      }, DEBOUNCE_MS);
+    }
+
+    originalText.textContent = finalTranscript + interim;
+  };
+
+  rec.onerror = (event) => {
+    console.error('Speech error:', event.error);
+    if (event.error === 'not-allowed') micStatus.textContent = '❌ Microphone access denied';
+    else if (event.error === 'no-speech') { /* silent */ }
+    else if (event.error === 'network') micStatus.textContent = '⚠️ Network issue';
+    else if (event.error === 'aborted') { /* ignore */ }
+    else micStatus.textContent = `⚠️ Error: ${event.error}`;
+  };
+
+  rec.onend = () => {
+    isListening = false;
+    micBtn.classList.remove('listening');
+    micStatus.textContent = 'Tap the mic to begin';
+    stopVisualizer();
+  };
+
+  return rec;
+}
+
+/* ---------- Translation ---------- */
+async function translateText(text) {
+  if (!text) return;
+
+  if (!navigator.onLine) {
+    micStatus.textContent = '⚠️ No internet — cannot translate';
+    showToast('⚠️ No internet connection');
+    return;
+  }
+
+  const from = sourceLang.value.split('-')[0];
+  const to   = targetLang.value.split('-')[0];
+
+  if (from === to) {
+    currentOriginal = text;
+    currentTranslation = text;
+    translatedText.textContent = text;
+    playBtn.disabled = false;
+    return;
+  }
+
+  try {
+    micStatus.textContent = '🔄 Translating…';
+
+    const url =
+      `https://translate.googleapis.com/translate_a/single` +
+      `?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
+
+    const res  = await fetch(url);
+    const data = await res.json();
+
+    const translated = (data?.[0] || [])
+      .map(item => item?.[0])
+      .filter(Boolean)
+      .join('')
+      .trim() || '—';
+
+    currentOriginal    = text;
+    currentTranslation = translated;
+
+    translatedText.textContent = translated;
+    playBtn.disabled = false;
+    micStatus.textContent = '✅ Done';
+
+    saveToHistory(text, translated, sourceLang.value, targetLang.value);
+
+    if (autoPlayToggle.checked) speakTranslation();
+  } catch (err) {
+    console.error(err);
+    micStatus.textContent = '❌ Translation failed';
+    showToast('❌ Translation failed');
+  }
+}
+
+/* ---------- Text-to-Speech with Echo Guard ---------- */
+function speakTranslation() {
+  if (!currentTranslation) return;
+
+  if (echoGuardToggle.checked && isListening && recognition) {
+    try { recognition.stop(); } catch (_) {}
+  }
+
+  agentSpeaking = true;
+  window.speechSynthesis.cancel();
+
+  const utter = new SpeechSynthesisUtterance(currentTranslation);
+  utter.lang  = targetLang.value;
+  utter.rate  = parseFloat(speedRange.value);
+  utter.pitch = 1;
+
+  utter.onstart = () => { micStatus.textContent = '🔊 Speaking translation…'; };
+
+  utter.onend = () => {
+    agentSpeaking = false;
+    if (cooldownTimer) clearTimeout(cooldownTimer);
+    cooldownTimer = setTimeout(() => {
+      cooldownTimer = null;
+      micStatus.textContent = 'Tap the mic to begin';
+    }, echoGuardToggle.checked ? COOLDOWN_MS : 0);
+  };
+
+  utter.onerror = (e) => {
+    console.error('TTS error:', e);
+    agentSpeaking = false;
+  };
+
+  window.speechSynthesis.speak(utter);
+}
+
+/* ---------- Visualizer ---------- */
+async function startVisualizer() {
+  try {
+    micStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl:  true
+      }
+    });
+
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    analyser     = audioContext.createAnalyser();
+    analyser.fftSize = 64;
+
+    const source = audioContext.createMediaStreamSource(micStream);
+    source.connect(analyser);
+
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray    = new Uint8Array(bufferLength);
+
+    function draw() {
+      vizAnimation = requestAnimationFrame(draw);
+      analyser.getByteFrequencyData(dataArray);
+
+      vizCtx.clearRect(0, 0, visualizer.width, visualizer.height);
+
+      const barWidth = (visualizer.width / bufferLength) * 2;
+      let x = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const barHeight = (dataArray[i] / 255) * visualizer.height * 0.85;
+        const gradient = vizCtx.createLinearGradient(0, 0, 0, visualizer.height);
+        gradient.addColorStop(0, '#06b6d4');
+        gradient.addColorStop(1, '#6366f1');
+        vizCtx.fillStyle = gradient;
+        vizCtx.fillRect(x, visualizer.height - barHeight, barWidth - 1.5, barHeight);
+        x += barWidth;
+      }
+    }
+    draw();
+  } catch (err) {
+    console.warn('Visualizer unavailable:', err);
+  }
+}
+
+function stopVisualizer() {
+  if (vizAnimation) cancelAnimationFrame(vizAnimation);
+  vizAnimation = null;
+
+  if (micStream) {
+    micStream.getTracks().forEach(t => t.stop());
+    micStream = null;
+  }
+  if (audioContext) {
+    audioContext.close();
+    audioContext = null;
+  }
+  vizCtx.clearRect(0, 0, visualizer.width, visualizer.height);
+}
+
+/* ---------- History ---------- */
+function getHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+  } catch { return []; }
+}
+
+function saveToHistory(original, translated, from, to) {
+  const history = getHistory();
+  history.unshift({
+    id: Date.now(),
+    original, translated, from, to,
+    time: new Date().toLocaleString()
+  });
+  if (history.length > MAX_HISTORY) history.length = MAX_HISTORY;
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  updateHistoryBadge();
+  if (historyOverlay.classList.contains('open')) renderHistory();
+}
+
+function updateHistoryBadge() {
+  const count = getHistory().length;
+  historyBadge.textContent = count;
+  historyBadge.style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+function renderHistory() {
+  const history = getHistory();
+  if (!history.length) {
+    historyList.innerHTML = '<p class="empty-history">No translations yet.</p>';
+    return;
+  }
+  historyList.innerHTML = history.map(item => `
+    <div class="history-item">
+      <div class="lang-pair">${item.from} → ${item.to}</div>
+      <div class="original">"${escapeHtml(item.original)}"</div>
+      <div class="translated">${escapeHtml(item.translated)}</div>
+      <div class="time">${item.time}</div>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+/* ---------- Event Listeners ---------- */
+micBtn.addEventListener('click', () => {
+  if (!SpeechRecognition) return;
+
+  if (isListening) {
+    try { recognition.stop(); } catch (_) {}
+    return;
+  }
+
+  finalTranscript = '';
+  currentOriginal = '';
+  currentTranslation = '';
+  originalText.textContent   = '';
+  translatedText.textContent = '';
+  playBtn.disabled = true;
+
+  recognition = createRecognition();
+  recognition.lang = sourceLang.value;
+
+  try { recognition.start(); }
+  catch (err) {
+    console.error(err);
+    micStatus.textContent = '⚠️ Could not start microphone';
+  }
+});
+
+playBtn.addEventListener('click', () => {
+  if (currentTranslation) speakTranslation();
+});
+
+copyOriginal.addEventListener('click', async () => {
+  const text = originalText.textContent.trim();
+  if (!text) return;
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast('📋 Original copied');
+  } catch { showToast('❌ Copy failed'); }
+});
+
+copyTranslation.addEventListener('click', async () => {
+  const text = translatedText.textContent.trim();
+  if (!text) return;
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast('📋 Translation copied');
+  } catch { showToast('❌ Copy failed'); }
+});
+
+swapBtn.addEventListener('click', () => {
+  const s = sourceLang.value;
+  sourceLang.value = targetLang.value;
+  targetLang.value = s;
+  if (isListening) { try { recognition.stop(); } catch (_) {} }
+  showToast('🔄 Languages swapped');
+});
+
+speedRange.addEventListener('input', () => {
+  speedValue.textContent = parseFloat(speedRange.value).toFixed(1) + '×';
+});
+
+sourceLang.addEventListener('change', () => {
+  if (isListening) { try { recognition.stop(); } catch (_) {} }
+});
+
+historyBtn.addEventListener('click', () => {
+  renderHistory();
+  historyOverlay.classList.add('open');
+});
+
+closeHistory.addEventListener('click', () => {
+  historyOverlay.classList.remove('open');
+});
+
+historyOverlay.addEventListener('click', (e) => {
+  if (e.target === historyOverlay) historyOverlay.classList.remove('open');
+});
+
+exportBtn.addEventListener('click', () => {
+  const history = getHistory();
+  if (!history.length) { showToast('⚠️ History is empty'); return; }
+
+  const blob = new Blob([JSON.stringify(history, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `linguacast-history-${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📥 History exported');
+});
+
+clearHistoryBtn.addEventListener('click', () => {
+  if (!getHistory().length) { showToast('⚠️ History is already empty'); return; }
+  if (confirm('Delete all translation history?')) {
+    localStorage.removeItem(HISTORY_KEY);
+    renderHistory();
+    updateHistoryBadge();
+    showToast('🗑️ History cleared');
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' ||
+      e.target.tagName === 'SELECT' ||
+      e.target.tagName === 'TEXTAREA') return;
+
+  if (e.code === 'Space') { e.preventDefault(); micBtn.click(); }
+  if (e.code === 'KeyT')  { themeToggle.click(); }
+});
+
+/* ---------- Init ---------- */
+initTheme();
+updateHistoryBadge();
+speedValue.textContent = parseFloat(speedRange.value).toFixed(1) + '×';
+
+const yearEl = document.getElementById('year');
+if (yearEl) yearEl.textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
